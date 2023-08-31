@@ -29,4 +29,10 @@ public class WeatherForecastController : ControllerBase
             })
             .ToArray();
     }
+
+    [HttpGet("test")]
+    public ActionResult<string> Test()
+    {
+        return Ok("test");
+    }
 }
