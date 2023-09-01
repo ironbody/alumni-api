@@ -53,6 +53,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors(policyBuilder =>
+{
+    policyBuilder.WithOrigins("http://localhost:5173", "https://alumni-web-five.vercel.app");
+    policyBuilder.AllowAnyHeader();
+    policyBuilder.AllowAnyMethod();
+});
 
 app.UseAuthorization();
 
