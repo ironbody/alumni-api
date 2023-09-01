@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AlumniAPI.Controllers;
@@ -31,6 +32,7 @@ public class WeatherForecastController : ControllerBase
     }
 
     [HttpGet("test")]
+    [Authorize]
     public ActionResult<string> Test()
     {
         return Ok("test");
