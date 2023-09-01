@@ -24,13 +24,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKeyResolver = (token, securityToken, kid, parameters) =>
             {
                 var client = new HttpClient();
-                var keyuri = builder.Configuration["TokenSecrets:KeyURI"];
+                var keyuri = Environment.GetEnvironmentVariable("TOKEN_KEYURI");
                 var response = client.GetAsync(keyuri).Result;
                 var responseString = response.Content.ReadAsStringAsync().Result;
                 var keys = JsonConvert.DeserializeObject<JsonWebKeySet>(responseString);
                 return keys.Keys;
             },
-            ValidIssuers = new List<string> { builder.Configuration["TokenSecrets:IssuerURI"] },
+            ValidIssuers = new List<string> { Environment.GetEnvironmentVariable("TOKEN_ISSUERURI") },
             ValidAudience = "account"
         };
     });
