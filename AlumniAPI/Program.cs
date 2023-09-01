@@ -15,7 +15,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<AlumniDbContext>(opt =>
-    opt.UseSqlServer(Environment.GetEnvironmentVariable("ConnectionString")));
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 //Services using Dependency injection
 builder.Services.AddScoped<ITestService, TestService>();
