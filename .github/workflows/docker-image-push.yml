@@ -18,8 +18,6 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         # Password or personal access token used to log against the Docker registry
         password: ${{ secrets.DOCKER_PASSWORD }}
-#    - name: Build the Docker image
-#      run: docker build . --file Dockerfile --tag alumni-api:$(date +%s)
     - name: Build and push Docker images
       uses: docker/build-push-action@v4.1.1
       with:
