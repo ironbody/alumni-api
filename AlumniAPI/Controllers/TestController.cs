@@ -20,10 +20,10 @@ public class TestController: ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<TestDto>>> GetMovie()
+    public async Task<ActionResult<IEnumerable<TestDto>>> GetName()
     {
-        var movies = await _service.GetAllAsync();
-        var movieDto = _mapper.Map<List<TestDto>>(movies);
-        return Ok(movieDto);
+        var names = await _service.GetAllAsync();
+        var testDto = _mapper.Map<List<TestDto>>(names);
+        return Ok(testDto);
     }
 }
