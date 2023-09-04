@@ -10,6 +10,7 @@ public class User
     [MaxLength(300)] public string? AvatarURL { get; set; }
     [MaxLength(300)] public string? Bio { get; set; }
     [MaxLength(100)] public string? FunFact { get; set; }
+    [MaxLength(100)] public string? WorkStatus { get; set; }
     
     public ICollection<DirectMessage> SentMessages { get; set; }
     public ICollection<DirectMessage> ReceivedMessages { get; set; }
