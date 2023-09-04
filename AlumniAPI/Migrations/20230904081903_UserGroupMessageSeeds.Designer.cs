@@ -4,6 +4,7 @@ using AlumniAPI.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AlumniAPI.Migrations
 {
     [DbContext(typeof(AlumniDbContext))]
-    partial class AlumniDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230904081903_UserGroupMessageSeeds")]
+    partial class UserGroupMessageSeeds
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -95,46 +98,6 @@ namespace AlumniAPI.Migrations
                         });
                 });
 
-            modelBuilder.Entity("AlumniAPI.Models.EventInfo", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("End")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("PostId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Start")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PostId")
-                        .IsUnique();
-
-                    b.ToTable("EventInfo");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            End = new DateTime(2023, 9, 10, 22, 0, 0, 0, DateTimeKind.Unspecified),
-                            Location = "My place",
-                            PostId = 2,
-                            Start = new DateTime(2023, 9, 10, 18, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
-                });
-
             modelBuilder.Entity("AlumniAPI.Models.Group", b =>
                 {
                     b.Property<int>("Id")
@@ -174,75 +137,6 @@ namespace AlumniAPI.Migrations
                             Id = 3,
                             Description = "Group for people who LOVE spongebob",
                             Name = "Spongebob Fanatics"
-                        });
-                });
-
-            modelBuilder.Entity("AlumniAPI.Models.Post", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Body")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<DateTime>("CreatedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("CreatorId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("EditedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("GroupId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatorId");
-
-                    b.HasIndex("GroupId");
-
-                    b.ToTable("Post");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Body = "So we're having a skibidi event. If anyone have any good ideas, please write them down below.",
-                            CreatedDateTime = new DateTime(2023, 9, 4, 17, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatorId = 1,
-                            GroupId = 1,
-                            Title = "Ideas for the skibidi event"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Body = "Kräftskiva at my place, BYOB",
-                            CreatedDateTime = new DateTime(2023, 9, 3, 20, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatorId = 2,
-                            GroupId = 2,
-                            Title = "Kräftskiva"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Body = "Wow this post is edited. Isn't that crazy?",
-                            CreatedDateTime = new DateTime(2023, 9, 4, 15, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatorId = 3,
-                            EditedDateTime = new DateTime(2023, 9, 4, 16, 0, 0, 0, DateTimeKind.Unspecified),
-                            GroupId = 3,
-                            Title = "I love editing posts"
                         });
                 });
 
@@ -388,36 +282,6 @@ namespace AlumniAPI.Migrations
                     b.Navigation("Sender");
                 });
 
-            modelBuilder.Entity("AlumniAPI.Models.EventInfo", b =>
-                {
-                    b.HasOne("AlumniAPI.Models.Post", "Post")
-                        .WithOne("EventInfo")
-                        .HasForeignKey("AlumniAPI.Models.EventInfo", "PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Post");
-                });
-
-            modelBuilder.Entity("AlumniAPI.Models.Post", b =>
-                {
-                    b.HasOne("AlumniAPI.Models.User", "Creator")
-                        .WithMany("Posts")
-                        .HasForeignKey("CreatorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AlumniAPI.Models.Group", "Group")
-                        .WithMany("Posts")
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Creator");
-
-                    b.Navigation("Group");
-                });
-
             modelBuilder.Entity("AlumniAPI.Models.UserGroup", b =>
                 {
                     b.HasOne("AlumniAPI.Models.Group", null)
@@ -433,20 +297,8 @@ namespace AlumniAPI.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("AlumniAPI.Models.Group", b =>
-                {
-                    b.Navigation("Posts");
-                });
-
-            modelBuilder.Entity("AlumniAPI.Models.Post", b =>
-                {
-                    b.Navigation("EventInfo");
-                });
-
             modelBuilder.Entity("AlumniAPI.Models.User", b =>
                 {
-                    b.Navigation("Posts");
-
                     b.Navigation("ReceivedMessages");
 
                     b.Navigation("SentMessages");
