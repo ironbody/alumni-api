@@ -1,4 +1,4 @@
-﻿using AlumniAPI.Models;
+using AlumniAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace AlumniAPI.DataAccess;
@@ -13,6 +13,8 @@ public class AlumniDbContext: DbContext
     public DbSet<User> User { get; set; }
     public DbSet<Group> Group { get; set; }
     public DbSet<DirectMessage> DirectMessage { get; set; }
+    public DbSet<Post> Post { get; set; }
+    public DbSet<EventInfo> EventInfo { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         //ManyToMany
@@ -34,8 +36,16 @@ public class AlumniDbContext: DbContext
             .HasForeignKey(d => d.RecipientId)
             .OnDelete(DeleteBehavior.NoAction);
         
+        modelBuilder.Entity<User>()
+            .HasMany(e => e.Posts)
+            .WithOne(e => e.Creator)
+            .HasForeignKey(e => e.CreatorId)
+            .IsRequired();
+        
         //Seeding
         modelBuilder.Entity<Test>().HasData(SeedHelper.GetTestSeeds());
+        modelBuilder.Entity<Post>().HasData(SeedHelper.GetPostSeeds());
+        modelBuilder.Entity<EventInfo>().HasData(SeedHelper.GetEventInfoSeeds());
         modelBuilder.Entity<User>().HasData(SeedHelper.GetUserSeeds());
         modelBuilder.Entity<Group>().HasData(SeedHelper.GetGroupSeeds());
         modelBuilder.Entity<DirectMessage>().HasData(SeedHelper.GetMessageSeeds());

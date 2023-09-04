@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace AlumniAPI.Models;
 
@@ -9,4 +9,5 @@ public class Group
     [MaxLength(1000)] public string? Description { get; set; }
     
     public ICollection<User> Users { get; set; }
+    public ICollection<Post> Posts { get; set; }
 }

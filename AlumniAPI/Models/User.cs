@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AlumniAPI.Models;
@@ -15,4 +15,5 @@ public class User
     public ICollection<DirectMessage> ReceivedMessages { get; set; }
     
     public ICollection<Group> Groups { get; set; }
+    public ICollection<Post> Posts { get; set; }
 }
