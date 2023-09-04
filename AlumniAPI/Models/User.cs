@@ -17,4 +17,5 @@ public class User
     
     public ICollection<Group> Groups { get; set; }
     public ICollection<Post> Posts { get; set; }
+    public ICollection<Reply> Replies { get; set; }
 }

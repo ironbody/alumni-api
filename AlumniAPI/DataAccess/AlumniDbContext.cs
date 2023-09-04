@@ -15,6 +15,7 @@ public class AlumniDbContext: DbContext
     public DbSet<DirectMessage> DirectMessage { get; set; }
     public DbSet<Post> Post { get; set; }
     public DbSet<EventInfo> EventInfo { get; set; }
+    public DbSet<Reply> Reply { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         //ManyToMany
@@ -36,10 +37,25 @@ public class AlumniDbContext: DbContext
             .HasForeignKey(d => d.RecipientId)
             .OnDelete(DeleteBehavior.NoAction);
         
+        // Post one to many
         modelBuilder.Entity<User>()
             .HasMany(e => e.Posts)
             .WithOne(e => e.Creator)
             .HasForeignKey(e => e.CreatorId)
+            .IsRequired();
+        
+        // Reply one to many with user
+        modelBuilder.Entity<Reply>()
+            .HasOne(e => e.Creator)
+            .WithMany(e => e.Replies)
+            .HasForeignKey(e => e.CreatorId)
+            .IsRequired(false);
+        
+        // Reply one to many with post
+        modelBuilder.Entity<Reply>()
+            .HasOne(e => e.ReplyTo)
+            .WithMany(e => e.Replies)
+            .HasForeignKey(e => e.ReplyToId)
             .IsRequired();
         
         //Seeding
@@ -50,6 +66,7 @@ public class AlumniDbContext: DbContext
         modelBuilder.Entity<Group>().HasData(SeedHelper.GetGroupSeeds());
         modelBuilder.Entity<DirectMessage>().HasData(SeedHelper.GetMessageSeeds());
         modelBuilder.Entity<UserGroup>().HasData(SeedHelper.GetUserGroupSeeds());
-        
+        modelBuilder.Entity<Reply>().HasData(SeedHelper.GetReplySeed());
+
     }
 }

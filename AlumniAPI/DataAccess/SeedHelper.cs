@@ -84,6 +84,22 @@ public static class SeedHelper
         };
     }
 
+    public static List<Reply> GetReplySeed()
+    {
+        var r1 = new Reply()
+        {
+            Id = 1,
+            CreatorId = 2,
+            ReplyToId = 1,
+            Body = "I think we should have drinks and scooby snacks"
+        };
+
+        return new List<Reply>()
+        {
+            r1,
+        };
+    }
+
     public static List<User> GetUserSeeds()
     {
         return new List<User>()

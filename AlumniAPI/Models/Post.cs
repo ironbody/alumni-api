@@ -15,4 +15,6 @@ public class Post
     public DateTime CreatedDateTime { get; set; }
     public DateTime? EditedDateTime { get; set; }
     public EventInfo? EventInfo { get; set; }
+
+    public ICollection<Reply> Replies { get; set; }
 }
