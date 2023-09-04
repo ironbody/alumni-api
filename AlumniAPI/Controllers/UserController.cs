@@ -97,6 +97,11 @@ public class UserController : ControllerBase
         return NotFound();
     }
 
+    /// <summary>
+    /// Creates a new user
+    /// </summary>
+    /// <param name="userDto">The new user</param>
+    /// <returns>The created user</returns>
     [HttpPost]
     public async Task<ActionResult<ReadUserDto>> PostUser(CreateUserDto userDto)
     {
@@ -106,6 +111,11 @@ public class UserController : ControllerBase
         return CreatedAtAction("GetUser", new { id = userId }, dto);
     }
 
+    /// <summary>
+    /// Deletes a user
+    /// </summary>
+    /// <param name="id">The is of the user to be deleted</param>
+    /// <returns></returns>
     [HttpDelete]
     public async Task<ActionResult> DeleteUser(int id)
     {

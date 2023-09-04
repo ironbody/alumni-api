@@ -1,4 +1,5 @@
 using AlumniAPI.DataAccess;
+using AlumniAPI.Models;
 using AlumniAPI.Services;
 using AlumniAPI.Services.Interfaces;
 using DotNetEnv;
@@ -44,6 +45,7 @@ builder.Services.AddDbContext<AlumniDbContext>(opt =>
 //Services using Dependency injection
 builder.Services.AddScoped<ITestService, TestService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IDirectMessageService, DirectMessageService>();
 
 
 var app = builder.Build();
