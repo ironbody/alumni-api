@@ -36,5 +36,10 @@ public class AlumniDbContext: DbContext
         
         //Seeding
         modelBuilder.Entity<Test>().HasData(SeedHelper.GetTestSeeds());
+        modelBuilder.Entity<User>().HasData(SeedHelper.GetUserSeeds());
+        modelBuilder.Entity<Group>().HasData(SeedHelper.GetGroupSeeds());
+        modelBuilder.Entity<DirectMessage>().HasData(SeedHelper.GetMessageSeeds());
+        modelBuilder.Entity<UserGroup>().HasData(SeedHelper.GetUserGroupSeeds());
+        
     }
 }
