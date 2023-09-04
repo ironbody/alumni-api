@@ -1,4 +1,6 @@
-﻿using AlumniAPI.DTOs.User;
+﻿using System.Net.Mime;
+using AlumniAPI.DTOs.DirectMessage;
+using AlumniAPI.DTOs.User;
 using AlumniAPI.Models;
 using AlumniAPI.Services.Interfaces;
 using AutoMapper;
@@ -9,8 +11,11 @@ using Microsoft.Identity.Client;
 
 namespace AlumniAPI.Controllers;
 
+[Route("api/[controller]")]
 [ApiController]
-[Route("[controller]")]
+[Produces(MediaTypeNames.Application.Json)]
+[Consumes(MediaTypeNames.Application.Json)]
+[ApiConventionType(typeof(DefaultApiConventions))]
 public class UserController : ControllerBase
 {
     private readonly IUserService _service;
@@ -116,7 +121,29 @@ public class UserController : ControllerBase
         await _service.DeleteAsync(user);
         return NoContent();
     }
-    
 
+    [HttpGet("{senderId:int}/messages/{recipientId:int}")]
+    public async Task<ActionResult<IEnumerable<ReadDirectMessageDto>>> GetUserMessages(int senderId, int recipientId)
+    {
+        if (!await _service.ExistsWithIdAsync(senderId) || await _service.ExistsWithIdAsync(recipientId))
+        {
+            return NotFound();
+        }
+
+        if (senderId == recipientId)
+        {
+            return BadRequest();
+        }
+
+        var userWithMessages = await _service.GetUserIncludingMessages(senderId);
+        List<DirectMessage> filteredSent = userWithMessages.SentMessages.Where(e => e.SenderId == senderId && e.RecipientId == recipientId).ToList();
+        List<DirectMessage> filteredReceived = userWithMessages.ReceivedMessages.Where(e => e.SenderId == recipientId && e.RecipientId == senderId).ToList();
+        List<DirectMessage> messages = new List<DirectMessage>(filteredSent.Concat(filteredReceived).OrderBy(e => e.SentTime));
+        var dmDto = _mapper.Map<List<ReadDirectMessageDto>>(messages);
+        return dmDto;
+    }
+    
+    
+    //Todo: Implement Get Groups & Get Posts
     
 }

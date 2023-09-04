@@ -13,7 +13,7 @@ public class UserService: IUserService
     {
         _context = context;
     }
-    
+    //Basic crud
     public async Task<User?> GetByIdAsync(int id)
     {
         return await _context.User.FindAsync(id);
@@ -46,5 +46,32 @@ public class UserService: IUserService
     {
         _context.User.Remove(entity);
         await _context.SaveChangesAsync();
+    }
+
+    
+    //Special
+    public async Task<User> GetUserIncludingMessages(int id)
+    {
+        return await _context.User
+            .Include(user => user.ReceivedMessages)
+            .Include(user => user.SentMessages)
+            .Where(user => user.Id == id)
+            .FirstAsync();
+    }
+
+    public async Task<User> GetUserIncludingGroups(int id)
+    {
+        return await _context.User
+            .Include(user => user.Groups)
+            .Where(user => user.Id == id)
+            .FirstAsync();
+    }
+
+    public async Task<User> GetUserIncludingPosts(int id)
+    {
+        return await _context.User
+            .Include(user => user.Posts)
+            .Where(user => user.Id == id)
+            .FirstAsync();
     }
 }
