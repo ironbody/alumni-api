@@ -49,9 +49,9 @@ public class AlumniDbContext: DbContext
             .HasOne(e => e.Creator)
             .WithMany(e => e.Replies)
             .HasForeignKey(e => e.CreatorId)
-            .IsRequired();
+            .IsRequired(false);
         
-        // Reply one to many with user
+        // Reply one to many with post
         modelBuilder.Entity<Reply>()
             .HasOne(e => e.ReplyTo)
             .WithMany(e => e.Replies)

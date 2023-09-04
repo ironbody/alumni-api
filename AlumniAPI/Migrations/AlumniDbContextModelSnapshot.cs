@@ -259,7 +259,7 @@ namespace AlumniAPI.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
-                    b.Property<int>("CreatorId")
+                    b.Property<int?>("CreatorId")
                         .HasColumnType("int");
 
                     b.Property<int>("ReplyToId")
@@ -459,9 +459,7 @@ namespace AlumniAPI.Migrations
                 {
                     b.HasOne("AlumniAPI.Models.User", "Creator")
                         .WithMany("Replies")
-                        .HasForeignKey("CreatorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CreatorId");
 
                     b.HasOne("AlumniAPI.Models.Post", "ReplyTo")
                         .WithMany("Replies")

@@ -16,7 +16,7 @@ namespace AlumniAPI.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CreatorId = table.Column<int>(type: "int", nullable: false),
+                    CreatorId = table.Column<int>(type: "int", nullable: true),
                     ReplyToId = table.Column<int>(type: "int", nullable: false),
                     Body = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false)
                 },
@@ -33,8 +33,7 @@ namespace AlumniAPI.Migrations
                         name: "FK_Reply_User_CreatorId",
                         column: x => x.CreatorId,
                         principalTable: "User",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.InsertData(
