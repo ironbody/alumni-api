@@ -1,8 +1,10 @@
 using AlumniAPI.DataAccess;
 using AlumniAPI.Services;
+using AlumniAPI.Services.Interfaces;
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
@@ -41,6 +43,7 @@ builder.Services.AddDbContext<AlumniDbContext>(opt =>
 
 //Services using Dependency injection
 builder.Services.AddScoped<ITestService, TestService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 
 var app = builder.Build();
