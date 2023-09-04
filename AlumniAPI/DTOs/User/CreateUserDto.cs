@@ -7,4 +7,5 @@ public class CreateUserDto
     public string? AvatarURL { get; set; }
     public string? Bio { get; set; }
     public string? FunFact { get; set; }
+    public string? WorkStatus { get; set; }
 }

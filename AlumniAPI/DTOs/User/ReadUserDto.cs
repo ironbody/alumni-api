@@ -6,4 +6,5 @@ public class ReadUserDto
     public string Name { get; set; }
     public string? Bio { get; set; }
     public string? FunFact { get; set; }
+    public string? WorkStatus { get; set; }
 }

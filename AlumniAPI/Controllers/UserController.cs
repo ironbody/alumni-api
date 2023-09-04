@@ -125,15 +125,16 @@ public class UserController : ControllerBase
     [HttpGet("{senderId:int}/messages/{recipientId:int}")]
     public async Task<ActionResult<IEnumerable<ReadDirectMessageDto>>> GetUserMessages(int senderId, int recipientId)
     {
-        if (!await _service.ExistsWithIdAsync(senderId) || await _service.ExistsWithIdAsync(recipientId))
-        {
-            return NotFound();
-        }
-
         if (senderId == recipientId)
         {
             return BadRequest();
         }
+        if (!await _service.ExistsWithIdAsync(senderId) || !await _service.ExistsWithIdAsync(recipientId))
+        {
+            return NotFound();
+        }
+
+        
 
         var userWithMessages = await _service.GetUserIncludingMessages(senderId);
         List<DirectMessage> filteredSent = userWithMessages.SentMessages.Where(e => e.SenderId == senderId && e.RecipientId == recipientId).ToList();

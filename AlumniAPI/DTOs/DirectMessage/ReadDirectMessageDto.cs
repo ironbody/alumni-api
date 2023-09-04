@@ -2,7 +2,6 @@
 
 public class ReadDirectMessageDto
 {
-    public int Id { get; set; }
     public string Body { get; set; }
     public DateTime SentTime { get; set; }
     public int SenderId { get; set; }
