@@ -1,4 +1,5 @@
 ﻿using System.Net.Mime;
+using System.Security.Cryptography.X509Certificates;
 using AlumniAPI.DTOs.DirectMessage;
 using AlumniAPI.DTOs.Group;
 using AlumniAPI.DTOs.User;
@@ -134,30 +135,75 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// Get all messages between two users
+    /// Get all conversations from a user
     /// </summary>
-    /// <param name="senderId">The sender</param>
-    /// <param name="recipientId">The reciever</param>
+    /// <param name="id">The user</param>
     /// <returns>A list of direct messages</returns>
-    [HttpGet("{senderId:int}/messages/{recipientId:int}")]
-    public async Task<ActionResult<IEnumerable<ReadDirectMessageDto>>> GetUserMessages(int senderId, int recipientId)
+    [HttpGet("{id:int}/messages")]
+    public async Task<ActionResult<IEnumerable<IEnumerable<ReadDirectMessageDto>>>> GetUserMessages(int id)
     {
-        if (senderId == recipientId)
-        {
-            return BadRequest();
-        }
-        if (!await _service.ExistsWithIdAsync(senderId) || !await _service.ExistsWithIdAsync(recipientId))
+
+        if (!await _service.ExistsWithIdAsync(id))
         {
             return NotFound();
         }
 
-        
+        var userWithMessages = await _service.GetUserIncludingMessages(id);
+        List<List<DirectMessage>> messages =  GetUserConvos(id, userWithMessages);
+        //Order by latest message in convo
+        messages = messages.OrderByDescending(e => e[e.Count-1].SentTime).ToList();
+        var dmDto = _mapper.Map<List<List<ReadDirectMessageDto>>>(messages);
+        return dmDto;
+    }
+    
+    /// <summary>
+    /// Get specific conversation from user
+    /// </summary>
+    /// <param name="id">The id of the user</param>
+    /// <param name="dmId">The index of the conversation</param>
+    /// <returns>A list of direct messages</returns>
+    [HttpGet("{id:int}/messages/{dmId:int}")]
+    public async Task<ActionResult<IEnumerable<ReadDirectMessageDto>>> GetUserMessages(int id, int dmId)
+    {
 
-        var userWithMessages = await _service.GetUserIncludingMessages(senderId);
-        List<DirectMessage> filteredSent = userWithMessages.SentMessages.Where(e => e.SenderId == senderId && e.RecipientId == recipientId).ToList();
-        List<DirectMessage> filteredReceived = userWithMessages.ReceivedMessages.Where(e => e.SenderId == recipientId && e.RecipientId == senderId).ToList();
-        List<DirectMessage> messages = new List<DirectMessage>(filteredSent.Concat(filteredReceived).OrderBy(e => e.SentTime));
-        var dmDto = _mapper.Map<List<ReadDirectMessageDto>>(messages);
+        if (!await _service.ExistsWithIdAsync(id))
+        {
+            return NotFound();
+        }
+
+        var userWithMessages = await _service.GetUserIncludingMessages(id);
+        List<List<DirectMessage>> messages =  GetUserConvos(id, userWithMessages);
+        //Order by latest message in convo
+        messages = messages.OrderByDescending(e => e[e.Count-1].SentTime).ToList();
+        var dmDto = _mapper.Map<List<ReadDirectMessageDto>>(messages[dmId]);
+        
+        return dmDto;
+    }
+    
+    /// <summary>
+    /// Get specific conversation between two users
+    /// </summary>
+    /// <param name="id">The id of the first user</param>
+    /// <param name="id2">The id of the other user</param>
+    /// <returns>A list of direct messages</returns>
+    [HttpGet("{id:int}/messages/user/{id2:int}")]
+    public async Task<ActionResult<IEnumerable<ReadDirectMessageDto>>> GetUserMessagesForSpecificUser(int id, int id2)
+    {
+
+        if (!await _service.ExistsWithIdAsync(id))
+        {
+            return NotFound();
+        }
+
+        var userWithMessages = await _service.GetUserIncludingMessages(id);
+        List<List<DirectMessage>> messages =  GetUserConvos(id, userWithMessages);
+        //Order by latest message in convo
+        messages = messages.OrderByDescending(e => e[e.Count-1].SentTime).ToList().Where(e => e[0].RecipientId == id2 || e[0].SenderId == id2).ToList();
+        if (messages.Count <= 0)
+        {
+            return BadRequest();
+        }
+        var dmDto = _mapper.Map<List<ReadDirectMessageDto>>(messages[0]);
         return dmDto;
     }
     
@@ -199,6 +245,47 @@ public class UserController : ControllerBase
         List<Group> groups = userWithPosts.Groups.ToList();
         var groupsDto = _mapper.Map<List<ReadGroupDto>>(groups);
         return groupsDto;
+    }
+
+
+
+
+
+    private  List<List<DirectMessage>> GetUserConvos(int id, User userWithMessages)
+    {
+
+        Dictionary<int, List<DirectMessage>> dmMap = new Dictionary<int, List<DirectMessage>>();
+        foreach (var dm in userWithMessages.ReceivedMessages)
+        {
+            if (!dmMap.ContainsKey(dm.SenderId))
+            {
+                dmMap.Add(dm.SenderId, new List<DirectMessage>());
+            }
+            dmMap[dm.SenderId].Add(dm);
+        }
+        foreach (var dm in userWithMessages.SentMessages)
+        {
+            if (!dmMap.ContainsKey(dm.RecipientId))
+            {
+                dmMap.Add(dm.RecipientId, new List<DirectMessage>());
+            }
+            dmMap[dm.RecipientId].Add(dm);
+        }
+
+        List<List<DirectMessage>> messages = new List<List<DirectMessage>>();
+        int i = 0;
+        foreach (var dms in dmMap)
+        {
+            messages.Add(new List<DirectMessage>());
+            foreach (var dm in dms.Value)
+            {
+                messages[i].Add(dm);
+            }
+            messages[i] = new List<DirectMessage>(messages[i].OrderBy(e => e.SentTime));
+            i++;
+        }
+
+        return messages;
     }
     
 }
