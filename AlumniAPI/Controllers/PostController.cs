@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices.ComTypes;
 using System.Security.Claims;
 using AlumniAPI.DTOs.Post;
+using AlumniAPI.DTOs.Post.Reply;
 using AlumniAPI.Extensions;
 using AlumniAPI.Models;
 using AlumniAPI.Services.Interfaces;
@@ -18,12 +19,14 @@ public class PostController : ControllerBase
 {
     private IPostService _postService;
     private IUserService _userService;
+    private IReplyService _replyService;
     private IMapper _mapper;
 
-    public PostController(IPostService postService, IUserService userService, IMapper mapper)
+    public PostController(IPostService postService, IUserService userService,IReplyService replyService, IMapper mapper)
     {
         _postService = postService;
         _userService = userService;
+        _replyService = replyService;
         _mapper = mapper;
     }
 
@@ -97,7 +100,7 @@ public class PostController : ControllerBase
         post.EditedDateTime = DateTime.Now;
 
         await _postService.UpdateAsync(post);
-        
+
         return NoContent();
     }
 
@@ -111,7 +114,149 @@ public class PostController : ControllerBase
         }
 
         await _postService.DeleteAsync(post);
+
+        return Ok();
+    }
+
+    [HttpGet("{postId:int}/reply")]
+    public async Task<ActionResult<IEnumerable<ReadReplyDto>>> GetReplies(int postId)
+    {
+        var post = await _postService.GetByIdAsync(postId);
+        if (post is null)
+        {
+            return NotFound();
+        }
+
+        var mappedReplies = _mapper.Map<List<ReadReplyDto>>(post.Replies);
+        return Ok(mappedReplies);
+    }
+
+    [HttpPost("{postId:int}/reply")]
+    public async Task<ActionResult<ReadReplyDto>> PostReply(int postId, CreateReplyDto dto)
+    {
+        var email = HttpContext.GetUserEmail();
+        var user = await _userService.GetUserByEmail(email);
+        if (user is null)
+        {
+            return BadRequest(
+                "No user found with the email from the token. Make sure to call /user/check before you call this route.");
+        }
+
+        var post = await _postService.GetByIdAsync(postId);
+        if (post is null)
+        {
+            return NotFound();
+        }
+
+        if (!await _userService.CanAccessGroup(user.Id, post.GroupId))
+        {
+            return Forbid();
+        }
+
+        var newReply = new Reply()
+        {
+            CreatorId = user.Id,
+            ReplyToId = post.Id,
+            CreatedDate = DateTime.Now,
+            Body = dto.Body,
+        };
         
+        post.Replies.Add(newReply);
+        await _postService.UpdateAsync(post);
+        return Ok(newReply);
+    }
+
+    [HttpPut("{postId:int}/reply/{replyId:int}")]
+    public async Task<ActionResult> EditReply(int postId, int replyId, EditReplyDto dto)
+    {
+
+        var email = HttpContext.GetUserEmail();
+        var user = await _userService.GetUserByEmail(email);
+
+        if (user is null)
+        {
+            return BadRequest(
+                "No user found with the email from the token. Make sure to call /user/check before you call this route.");
+        }
+        
+        var post = await _postService.GetByIdAsync(postId);
+        if (post is null)
+        {
+            return NotFound("Post doesn't exist");
+        }
+        
+        if (!await _userService.CanAccessGroup(user.Id, post.GroupId))
+        {
+            return Forbid();
+        }
+
+        if (user.Id != post.CreatorId)
+        {
+            return Forbid();
+        }
+
+        var reply = await _replyService.GetByIdAsync(replyId);
+        if (reply is null)
+        {
+            return NotFound("Reply does not exist");
+        }
+
+        if (reply.ReplyToId != postId)
+        {
+            return NotFound("Reply is not a reply to the given post");
+        }
+
+        reply.Body = dto.Body;
+
+        await _replyService.UpdateAsync(reply);
+
+        // WHY THE FUCK IS THERE SO MUCH CODE JUST FOR VALIDATION AAAAAAA
+        return Ok();
+    }
+    
+    [HttpDelete("{postId:int}/reply/{replyId:int}")]
+    public async Task<ActionResult> DeleteReply(int postId, int replyId)
+    {
+
+        var email = HttpContext.GetUserEmail();
+        var user = await _userService.GetUserByEmail(email);
+
+        if (user is null)
+        {
+            return BadRequest(
+                "No user found with the email from the token. Make sure to call /user/check before you call this route.");
+        }
+        
+        var post = await _postService.GetByIdAsync(postId);
+        if (post is null)
+        {
+            return NotFound("Post doesn't exist");
+        }
+        
+        if (!await _userService.CanAccessGroup(user.Id, post.GroupId))
+        {
+            return Forbid();
+        }
+
+        if (user.Id != post.CreatorId)
+        {
+            return Forbid();
+        }
+
+        var reply = await _replyService.GetByIdAsync(replyId);
+        if (reply is null)
+        {
+            return NotFound("Reply does not exist");
+        }
+
+        if (reply.ReplyToId != postId)
+        {
+            return NotFound("Reply is not a reply to the given post");
+        }
+
+        await _replyService.DeleteAsync(reply);
+
+        // WHY THE FUCK IS THERE SO MUCH CODE JUST FOR VALIDATION AAAAAAA
         return Ok();
     }
 }
