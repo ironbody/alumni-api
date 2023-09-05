@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AlumniAPI.Migrations
 {
     [DbContext(typeof(AlumniDbContext))]
-    [Migration("20230904130307_UserWorkStatus")]
-    partial class UserWorkStatus
+    [Migration("20230905065517_intialAfterNuke")]
+    partial class intialAfterNuke
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -249,7 +249,7 @@ namespace AlumniAPI.Migrations
                         });
                 });
 
-            modelBuilder.Entity("AlumniAPI.Models.Test", b =>
+            modelBuilder.Entity("AlumniAPI.Models.Reply", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -257,30 +257,32 @@ namespace AlumniAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Body")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int?>("CreatorId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReplyToId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Test");
+                    b.HasIndex("CreatorId");
+
+                    b.HasIndex("ReplyToId");
+
+                    b.ToTable("Reply");
 
                     b.HasData(
                         new
                         {
                             Id = 1,
-                            Name = "Oscar"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Simon"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Erik"
+                            Body = "I think we should have drinks and scooby snacks",
+                            CreatorId = 2,
+                            ReplyToId = 1
                         });
                 });
 
@@ -428,6 +430,23 @@ namespace AlumniAPI.Migrations
                     b.Navigation("Group");
                 });
 
+            modelBuilder.Entity("AlumniAPI.Models.Reply", b =>
+                {
+                    b.HasOne("AlumniAPI.Models.User", "Creator")
+                        .WithMany("Replies")
+                        .HasForeignKey("CreatorId");
+
+                    b.HasOne("AlumniAPI.Models.Post", "ReplyTo")
+                        .WithMany("Replies")
+                        .HasForeignKey("ReplyToId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Creator");
+
+                    b.Navigation("ReplyTo");
+                });
+
             modelBuilder.Entity("AlumniAPI.Models.UserGroup", b =>
                 {
                     b.HasOne("AlumniAPI.Models.Group", null)
@@ -451,6 +470,8 @@ namespace AlumniAPI.Migrations
             modelBuilder.Entity("AlumniAPI.Models.Post", b =>
                 {
                     b.Navigation("EventInfo");
+
+                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("AlumniAPI.Models.User", b =>
@@ -458,6 +479,8 @@ namespace AlumniAPI.Migrations
                     b.Navigation("Posts");
 
                     b.Navigation("ReceivedMessages");
+
+                    b.Navigation("Replies");
 
                     b.Navigation("SentMessages");
                 });

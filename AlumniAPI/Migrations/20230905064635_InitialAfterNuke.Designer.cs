@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AlumniAPI.Migrations
 {
     [DbContext(typeof(AlumniDbContext))]
-    [Migration("20230904081903_UserGroupMessageSeeds")]
-    partial class UserGroupMessageSeeds
+    [Migration("20230905064635_InitialAfterNuke")]
+    partial class InitialAfterNuke
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -98,6 +98,46 @@ namespace AlumniAPI.Migrations
                         });
                 });
 
+            modelBuilder.Entity("AlumniAPI.Models.EventInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("End")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("PostId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Start")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostId")
+                        .IsUnique();
+
+                    b.ToTable("EventInfo");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            End = new DateTime(2023, 9, 10, 22, 0, 0, 0, DateTimeKind.Unspecified),
+                            Location = "My place",
+                            PostId = 2,
+                            Start = new DateTime(2023, 9, 10, 18, 0, 0, 0, DateTimeKind.Unspecified)
+                        });
+                });
+
             modelBuilder.Entity("AlumniAPI.Models.Group", b =>
                 {
                     b.Property<int>("Id")
@@ -140,7 +180,7 @@ namespace AlumniAPI.Migrations
                         });
                 });
 
-            modelBuilder.Entity("AlumniAPI.Models.Test", b =>
+            modelBuilder.Entity("AlumniAPI.Models.Post", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -148,30 +188,101 @@ namespace AlumniAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Body")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime>("CreatedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CreatorId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("EditedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Test");
+                    b.HasIndex("CreatorId");
+
+                    b.HasIndex("GroupId");
+
+                    b.ToTable("Post");
 
                     b.HasData(
                         new
                         {
                             Id = 1,
-                            Name = "Oscar"
+                            Body = "So we're having a skibidi event. If anyone have any good ideas, please write them down below.",
+                            CreatedDateTime = new DateTime(2023, 9, 4, 17, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatorId = 1,
+                            GroupId = 1,
+                            Title = "Ideas for the skibidi event"
                         },
                         new
                         {
                             Id = 2,
-                            Name = "Simon"
+                            Body = "Kräftskiva at my place, BYOB",
+                            CreatedDateTime = new DateTime(2023, 9, 3, 20, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatorId = 2,
+                            GroupId = 2,
+                            Title = "Kräftskiva"
                         },
                         new
                         {
                             Id = 3,
-                            Name = "Erik"
+                            Body = "Wow this post is edited. Isn't that crazy?",
+                            CreatedDateTime = new DateTime(2023, 9, 4, 15, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatorId = 3,
+                            EditedDateTime = new DateTime(2023, 9, 4, 16, 0, 0, 0, DateTimeKind.Unspecified),
+                            GroupId = 3,
+                            Title = "I love editing posts"
+                        });
+                });
+
+            modelBuilder.Entity("AlumniAPI.Models.Reply", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int?>("CreatorId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReplyToId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatorId");
+
+                    b.HasIndex("ReplyToId");
+
+                    b.ToTable("Reply");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Body = "I think we should have drinks and scooby snacks",
+                            CreatorId = 2,
+                            ReplyToId = 1
                         });
                 });
 
@@ -200,6 +311,10 @@ namespace AlumniAPI.Migrations
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<string>("WorkStatus")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.HasKey("Id");
 
                     b.ToTable("User");
@@ -211,7 +326,8 @@ namespace AlumniAPI.Migrations
                             AvatarURL = "https://temashopse.b-cdn.net/media/catalog/product/cache/cat_resized/1200/0/s/h/shrek_r_maskeraddrakt_maskeraddrakter_maskeradklader_for_man.jpg",
                             Bio = "Shrek/Kong lover",
                             FunFact = "Loves Shrek and Kong",
-                            Name = "Oscar"
+                            Name = "Oscar",
+                            WorkStatus = "Rich"
                         },
                         new
                         {
@@ -219,7 +335,8 @@ namespace AlumniAPI.Migrations
                             AvatarURL = "https://preview.redd.it/ufc-fight-night-shrek-vs-adam-sandler-v0-d3r78jgnhmv91.jpg?width=512&format=pjpg&auto=webp&s=2f93c0115d58a24e638a69f0a21fc571da99ac55",
                             Bio = "Hello I'm Simon and I love HAVREFLARN med choklad",
                             FunFact = "Cookie lover XD",
-                            Name = "Simon"
+                            Name = "Simon",
+                            WorkStatus = "YeBoi"
                         },
                         new
                         {
@@ -227,7 +344,8 @@ namespace AlumniAPI.Migrations
                             AvatarURL = "https://pbs.twimg.com/profile_images/1342617687663521793/4lVjmcIk_400x400.jpg",
                             Bio = "Erik aka MuminLover1337",
                             FunFact = "I LOVE MUUUUMIN!",
-                            Name = "Erik"
+                            Name = "Erik",
+                            WorkStatus = "Lobster"
                         });
                 });
 
@@ -282,6 +400,53 @@ namespace AlumniAPI.Migrations
                     b.Navigation("Sender");
                 });
 
+            modelBuilder.Entity("AlumniAPI.Models.EventInfo", b =>
+                {
+                    b.HasOne("AlumniAPI.Models.Post", "Post")
+                        .WithOne("EventInfo")
+                        .HasForeignKey("AlumniAPI.Models.EventInfo", "PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+                });
+
+            modelBuilder.Entity("AlumniAPI.Models.Post", b =>
+                {
+                    b.HasOne("AlumniAPI.Models.User", "Creator")
+                        .WithMany("Posts")
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AlumniAPI.Models.Group", "Group")
+                        .WithMany("Posts")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Creator");
+
+                    b.Navigation("Group");
+                });
+
+            modelBuilder.Entity("AlumniAPI.Models.Reply", b =>
+                {
+                    b.HasOne("AlumniAPI.Models.User", "Creator")
+                        .WithMany("Replies")
+                        .HasForeignKey("CreatorId");
+
+                    b.HasOne("AlumniAPI.Models.Post", "ReplyTo")
+                        .WithMany("Replies")
+                        .HasForeignKey("ReplyToId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Creator");
+
+                    b.Navigation("ReplyTo");
+                });
+
             modelBuilder.Entity("AlumniAPI.Models.UserGroup", b =>
                 {
                     b.HasOne("AlumniAPI.Models.Group", null)
@@ -297,9 +462,25 @@ namespace AlumniAPI.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("AlumniAPI.Models.Group", b =>
+                {
+                    b.Navigation("Posts");
+                });
+
+            modelBuilder.Entity("AlumniAPI.Models.Post", b =>
+                {
+                    b.Navigation("EventInfo");
+
+                    b.Navigation("Replies");
+                });
+
             modelBuilder.Entity("AlumniAPI.Models.User", b =>
                 {
+                    b.Navigation("Posts");
+
                     b.Navigation("ReceivedMessages");
+
+                    b.Navigation("Replies");
 
                     b.Navigation("SentMessages");
                 });
