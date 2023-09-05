@@ -20,6 +20,8 @@ public class PostService : IPostService
             .Include(p => p.Creator)
             .Include(p => p.Group)
             .Include(p => p.EventInfo)
+            .Include(p => p.Replies)
+            .ThenInclude(r => r.Creator)
             .FirstOrDefaultAsync(p => p.Id == id);
         return post;
     }
