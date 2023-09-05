@@ -1,15 +1,12 @@
 ﻿using System.Net.Mime;
-using System.Security.Cryptography.X509Certificates;
 using AlumniAPI.DTOs.DirectMessage;
 using AlumniAPI.DTOs.Group;
 using AlumniAPI.DTOs.User;
 using AlumniAPI.Models;
 using AlumniAPI.Services.Interfaces;
 using AutoMapper;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
 
 namespace AlumniAPI.Controllers;
 
