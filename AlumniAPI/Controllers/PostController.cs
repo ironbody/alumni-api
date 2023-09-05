@@ -13,6 +13,7 @@ namespace AlumniAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class PostController : ControllerBase
 {
     private IPostService _postService;
@@ -53,7 +54,6 @@ public class PostController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize]
     public async Task<ActionResult<ReadPostDto>> CreateNewPost(CreatePostDto dto)
     {
         var email = HttpContext.GetUserEmail();
@@ -79,5 +79,39 @@ public class PostController : ControllerBase
         var test = await _postService.GetByIdAsync(newId);
 
         return CreatedAtAction(nameof(GetPostById), new { id = mapped.Id }, readDto);
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult> EditPost(int id, EditPostDto dto)
+    {
+        var post = await _postService.GetByIdAsync(id);
+        if (post is null)
+        {
+            return NotFound();
+        }
+
+        var info = _mapper.Map<EventInfo?>(dto.EventInfo);
+        post.Title = dto.Title;
+        post.Body = dto.Body;
+        post.EventInfo = info;
+        post.EditedDateTime = DateTime.Now;
+
+        await _postService.UpdateAsync(post);
+        
+        return NoContent();
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<ActionResult> DeletePost(int id)
+    {
+        var post = await _postService.GetByIdAsync(id);
+        if (post is null)
+        {
+            return NotFound();
+        }
+
+        await _postService.DeleteAsync(post);
+        
+        return Ok();
     }
 }

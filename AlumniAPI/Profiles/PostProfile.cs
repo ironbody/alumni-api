@@ -18,5 +18,8 @@ public class PostProfile : Profile
 
         CreateMap<CreateEventInfoDto, EventInfo>();
         CreateMap<CreatePostDto, Post>();
+
+        CreateMap<EditEventInfoDto, EventInfo>();
+        CreateMap<EditPostDto, Post>();
     }
 }
