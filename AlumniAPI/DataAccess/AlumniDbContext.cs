@@ -9,7 +9,6 @@ public class AlumniDbContext: DbContext
     {
     }
     
-    public DbSet<Test> Test { get; set; }
     public DbSet<User> User { get; set; }
     public DbSet<Group> Group { get; set; }
     public DbSet<DirectMessage> DirectMessage { get; set; }
@@ -59,7 +58,6 @@ public class AlumniDbContext: DbContext
             .IsRequired();
         
         //Seeding
-        modelBuilder.Entity<Test>().HasData(SeedHelper.GetTestSeeds());
         modelBuilder.Entity<Post>().HasData(SeedHelper.GetPostSeeds());
         modelBuilder.Entity<EventInfo>().HasData(SeedHelper.GetEventInfoSeeds());
         modelBuilder.Entity<User>().HasData(SeedHelper.GetUserSeeds());

@@ -43,7 +43,6 @@ builder.Services.AddDbContext<AlumniDbContext>(opt =>
 
 
 //Services using Dependency injection
-builder.Services.AddScoped<ITestService, TestService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IDirectMessageService, DirectMessageService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
