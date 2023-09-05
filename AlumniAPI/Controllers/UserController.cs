@@ -2,9 +2,11 @@
 using AlumniAPI.DTOs.DirectMessage;
 using AlumniAPI.DTOs.Group;
 using AlumniAPI.DTOs.User;
+using AlumniAPI.Extensions;
 using AlumniAPI.Models;
 using AlumniAPI.Services.Interfaces;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -124,11 +126,13 @@ public class UserController : ControllerBase
         {
             return NotFound();
         }
+
         var user = await _service.GetByIdAsync(id);
         if (user == null)
         {
             return NotFound();
         }
+
         await _service.DeleteAsync(user);
         return NoContent();
     }
@@ -146,17 +150,20 @@ public class UserController : ControllerBase
         {
             return BadRequest();
         }
+
         if (!await _service.ExistsWithIdAsync(senderId) || !await _service.ExistsWithIdAsync(recipientId))
         {
             return NotFound();
         }
 
-        
 
         var userWithMessages = await _service.GetUserIncludingMessages(senderId);
-        List<DirectMessage> filteredSent = userWithMessages.SentMessages.Where(e => e.SenderId == senderId && e.RecipientId == recipientId).ToList();
-        List<DirectMessage> filteredReceived = userWithMessages.ReceivedMessages.Where(e => e.SenderId == recipientId && e.RecipientId == senderId).ToList();
-        List<DirectMessage> messages = new List<DirectMessage>(filteredSent.Concat(filteredReceived).OrderBy(e => e.SentTime));
+        List<DirectMessage> filteredSent = userWithMessages.SentMessages
+            .Where(e => e.SenderId == senderId && e.RecipientId == recipientId).ToList();
+        List<DirectMessage> filteredReceived = userWithMessages.ReceivedMessages
+            .Where(e => e.SenderId == recipientId && e.RecipientId == senderId).ToList();
+        List<DirectMessage> messages =
+            new List<DirectMessage>(filteredSent.Concat(filteredReceived).OrderBy(e => e.SentTime));
         var dmDto = _mapper.Map<List<ReadDirectMessageDto>>(messages);
         return dmDto;
     }
@@ -201,4 +208,25 @@ public class UserController : ControllerBase
         return groupsDto;
     }
     
+
+    [HttpPost("check")]
+    [Authorize]
+    public async Task<ActionResult> CheckUser()
+    {
+        var email = HttpContext.GetUserEmail();
+        var user = await _service.GetUserByEmail(email);
+        if (user is not null) return Ok();
+        
+        var name = HttpContext.GetUserName();
+        var newUser = new User()
+        {
+            Email = email,
+            Name = name
+        };
+
+        await _service.AddAsync(newUser);
+
+        return Ok();
+    }
+    //Todo: Implement Get Groups & Get Posts
 }
