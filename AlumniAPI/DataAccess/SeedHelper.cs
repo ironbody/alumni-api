@@ -72,6 +72,7 @@ public static class SeedHelper
             Id = 1,
             CreatorId = 2,
             ReplyToId = 1,
+            CreatedDate = new DateTime(2023, 09, 03, 21, 0, 0),
             Body = "I think we should have drinks and scooby snacks"
         };
 

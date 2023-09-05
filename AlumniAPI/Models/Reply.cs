@@ -9,6 +9,7 @@ public class Reply
     public User? Creator { get; set; }
     public int ReplyToId { get; set; }
     public Post ReplyTo { get; set; }
+    public DateTime CreatedDate { get; set; }
 
     [MaxLength(2000)] public string Body { get; set; }
 }
