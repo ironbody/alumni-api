@@ -154,36 +154,12 @@ public class UserController : ControllerBase
     }
     
     /// <summary>
-    /// Get specific conversation from user
-    /// </summary>
-    /// <param name="id">The id of the user</param>
-    /// <param name="dmId">The index of the conversation</param>
-    /// <returns>A list of direct messages</returns>
-    [HttpGet("{id:int}/messages/{dmId:int}")]
-    public async Task<ActionResult<IEnumerable<ReadDirectMessageDto>>> GetUserMessages(int id, int dmId)
-    {
-
-        if (!await _service.ExistsWithIdAsync(id))
-        {
-            return NotFound();
-        }
-
-        var userWithMessages = await _service.GetUserIncludingMessages(id);
-        List<List<DirectMessage>> messages =  GetUserConvos(id, userWithMessages);
-        //Order by latest message in convo
-        messages = messages.OrderByDescending(e => e[e.Count-1].SentTime).ToList();
-        var dmDto = _mapper.Map<List<ReadDirectMessageDto>>(messages[dmId]);
-        
-        return dmDto;
-    }
-    
-    /// <summary>
     /// Get specific conversation between two users
     /// </summary>
     /// <param name="id">The id of the first user</param>
     /// <param name="id2">The id of the other user</param>
     /// <returns>A list of direct messages</returns>
-    [HttpGet("{id:int}/messages/user/{id2:int}")]
+    [HttpGet("{id:int}/messages/{id2:int}")]
     public async Task<ActionResult<IEnumerable<ReadDirectMessageDto>>> GetUserMessagesForSpecificUser(int id, int id2)
     {
 
@@ -245,9 +221,6 @@ public class UserController : ControllerBase
     }
 
 
-
-
-
     private  List<List<DirectMessage>> GetUserConvos(int id, User userWithMessages)
     {
 
@@ -278,7 +251,11 @@ public class UserController : ControllerBase
             {
                 messages[i].Add(dm);
             }
-            messages[i] = new List<DirectMessage>(messages[i].OrderBy(e => e.SentTime));
+            messages[i] = new List<DirectMessage>(messages[i].OrderByDescending(e => e.SentTime));
+            if (messages[i].Count() > 1)
+            {
+                messages[i].RemoveRange(1,messages[i].Count-1);
+            }
             i++;
         }
 
