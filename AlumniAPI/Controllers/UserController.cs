@@ -1,5 +1,6 @@
 ﻿using System.Net.Mime;
 using AlumniAPI.DTOs.DirectMessage;
+using AlumniAPI.DTOs.Group;
 using AlumniAPI.DTOs.User;
 using AlumniAPI.Models;
 using AlumniAPI.Services.Interfaces;
@@ -132,6 +133,12 @@ public class UserController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Get all messages between two users
+    /// </summary>
+    /// <param name="senderId">The sender</param>
+    /// <param name="recipientId">The reciever</param>
+    /// <returns>A list of direct messages</returns>
     [HttpGet("{senderId:int}/messages/{recipientId:int}")]
     public async Task<ActionResult<IEnumerable<ReadDirectMessageDto>>> GetUserMessages(int senderId, int recipientId)
     {
@@ -155,6 +162,43 @@ public class UserController : ControllerBase
     }
     
     
-    //Todo: Implement Get Groups & Get Posts
+    /// <summary>
+    /// Get all groups a user is in
+    /// </summary>
+    /// <param name="id">The id of the user</param>
+    /// <returns>A list of groups</returns>
+    [HttpGet("{id:int}/groups")]
+    public async Task<ActionResult<IEnumerable<ReadGroupDto>>> GetUserGroups(int id)
+    {
+        if (!await _service.ExistsWithIdAsync(id))
+        {
+            return NotFound();
+        }
+
+        var userWithGroups = await _service.GetUserIncludingGroups(id);
+        List<Group> groups = userWithGroups.Groups.ToList();
+        var groupsDto = _mapper.Map<List<ReadGroupDto>>(groups);
+        return groupsDto;
+    }
+    
+    
+    /// <summary>
+    /// Get all posts from a user
+    /// </summary>
+    /// <param name="id">The is of the user</param>
+    /// <returns>A list of posts</returns>
+    [HttpGet("{id:int}/posts")]
+    public async Task<ActionResult<IEnumerable<ReadGroupDto>>> GetUserPosts(int id)
+    {
+        if (!await _service.ExistsWithIdAsync(id))
+        {
+            return NotFound();
+        }
+
+        var userWithPosts = await _service.GetUserIncludingPosts(id);
+        List<Group> groups = userWithPosts.Groups.ToList();
+        var groupsDto = _mapper.Map<List<ReadGroupDto>>(groups);
+        return groupsDto;
+    }
     
 }
