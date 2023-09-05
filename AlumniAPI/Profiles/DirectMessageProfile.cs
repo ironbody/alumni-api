@@ -8,6 +8,8 @@ public class DirectMessageProfile: Profile
 {
     public DirectMessageProfile()
     {
+        CreateMap<DirectMessage, CreateDirectMessageDto>().ReverseMap();
         CreateMap<DirectMessage, ReadDirectMessageDto>().ReverseMap();
+        CreateMap<DirectMessage, UpdateDirectMessageDto>().ReverseMap();
     }
 }

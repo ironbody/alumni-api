@@ -1,6 +1,6 @@
 ﻿namespace AlumniAPI.DTOs.DirectMessage;
 
-public class ReadDirectMessageDto
+public class UpdateDirectMessageDto
 {
     public int Id { get; set; }
     public string Body { get; set; }
