@@ -15,5 +15,8 @@ public class PostProfile : Profile
         CreateMap<User, UserPostInfo>();
         CreateMap<Group, GroupPostInfo>();
         CreateMap<Post, ReadPostDto>();
+
+        CreateMap<CreateEventInfoDto, EventInfo>();
+        CreateMap<CreatePostDto, Post>();
     }
 }
