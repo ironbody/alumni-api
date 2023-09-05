@@ -39,13 +39,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddDbContext<AlumniDbContext>(opt =>
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DevConn")));
 
 
 //Services using Dependency injection
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IDirectMessageService, DirectMessageService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
+builder.Services.AddScoped<IPostService, PostService>();
 
 
 var app = builder.Build();
