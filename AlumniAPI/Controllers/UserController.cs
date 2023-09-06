@@ -20,6 +20,7 @@ namespace AlumniAPI.Controllers;
 [Produces(MediaTypeNames.Application.Json)]
 [Consumes(MediaTypeNames.Application.Json)]
 [ApiConventionType(typeof(DefaultApiConventions))]
+[Authorize]
 public class UserController : ControllerBase
 {
     private readonly IUserService _service;
@@ -57,6 +58,24 @@ public class UserController : ControllerBase
         }
 
         var user = await _service.GetByIdAsync(id);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var userDto = _mapper.Map<ReadUserDto>(user);
+        return Ok(userDto);
+    }
+
+    /// <summary>
+    /// Get a specific user
+    /// </summary>
+    /// <param name="email">The email of the user</param>
+    /// <returns></returns>
+    [HttpGet("{email}")]
+    public async Task<ActionResult<ReadUserDto>> GetUser(string email)
+    {
+        var user = await _service.GetUserByEmail(email);
         if (user == null)
         {
             return NotFound();
@@ -159,6 +178,8 @@ public class UserController : ControllerBase
         var dmDto = _mapper.Map<List<List<ReadDirectMessageDto>>>(messages);
         return dmDto;
     }
+    
+    
     
     /// <summary>
     /// Get specific conversation between two users
@@ -309,6 +330,27 @@ public class UserController : ControllerBase
         return NoContent();
     }
 
+    
+    [HttpPost("check")]
+    [Authorize]
+    public async Task<ActionResult> CheckUser()
+    {
+        var email = HttpContext.GetUserEmail();
+        var user = await _service.GetUserByEmail(email);
+        if (user is not null) return Ok();
+        
+        var name = HttpContext.GetUserName();
+        var newUser = new User()
+        {
+            Email = email,
+            Name = name
+        };
+
+        await _service.AddAsync(newUser);
+
+        return Ok();
+    }
+    
     private  List<List<DirectMessage>> GetUserConvos(int id, User userWithMessages)
     {
 
@@ -351,24 +393,5 @@ public class UserController : ControllerBase
     }
     
 
-    [HttpPost("check")]
-    [Authorize]
-    public async Task<ActionResult> CheckUser()
-    {
-        var email = HttpContext.GetUserEmail();
-        var user = await _service.GetUserByEmail(email);
-        if (user is not null) return Ok();
-        
-        var name = HttpContext.GetUserName();
-        var newUser = new User()
-        {
-            Email = email,
-            Name = name
-        };
 
-        await _service.AddAsync(newUser);
-
-        return Ok();
-    }
-    //Todo: Implement Get Groups & Get Posts
 }
