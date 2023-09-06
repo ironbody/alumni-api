@@ -16,6 +16,7 @@ DotNetEnv.Env.Load();
 // Add services to the container.
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -65,10 +66,12 @@ app.UseCors(policyBuilder =>
     policyBuilder.WithOrigins("http://localhost:5173", "https://alumni-web-five.vercel.app");
     policyBuilder.AllowAnyHeader();
     policyBuilder.AllowAnyMethod();
+    policyBuilder.AllowCredentials();
 });
 
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<ChatHub>("/chatHub");
 
 app.Run();
