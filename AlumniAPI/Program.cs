@@ -39,7 +39,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddDbContext<AlumniDbContext>(opt =>
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("DevConn")));
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
 //Services using Dependency injection
