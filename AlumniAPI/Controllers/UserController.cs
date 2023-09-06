@@ -1,6 +1,8 @@
 using System.Net.Mime;
 using AlumniAPI.DTOs.DirectMessage;
 using AlumniAPI.DTOs.Group;
+using AlumniAPI.DTOs.Post;
+using AlumniAPI.DTOs.Post.Reply;
 using AlumniAPI.DTOs.User;
 using AlumniAPI.Extensions;
 using AlumniAPI.Models;
@@ -212,7 +214,7 @@ public class UserController : ControllerBase
     /// <param name="id">The is of the user</param>
     /// <returns>A list of posts</returns>
     [HttpGet("{id:int}/posts")]
-    public async Task<ActionResult<IEnumerable<ReadGroupDto>>> GetUserPosts(int id)
+    public async Task<ActionResult<IEnumerable<ReadPostDto>>> GetUserPosts(int id)
     {
         if (!await _service.ExistsWithIdAsync(id))
         {
@@ -220,9 +222,28 @@ public class UserController : ControllerBase
         }
 
         var userWithPosts = await _service.GetUserIncludingPosts(id);
-        List<Group> groups = userWithPosts.Groups.ToList();
-        var groupsDto = _mapper.Map<List<ReadGroupDto>>(groups);
-        return groupsDto;
+        List<Post> posts = userWithPosts.Posts.ToList();
+        var postsDto = _mapper.Map<List<ReadPostDto>>(posts);
+        return postsDto;
+    }
+    
+    /// <summary>
+    /// Get all posts from a user
+    /// </summary>
+    /// <param name="id">The is of the user</param>
+    /// <returns>A list of posts</returns>
+    [HttpGet("{id:int}/replies")]
+    public async Task<ActionResult<IEnumerable<ReadReplyDto>>> GetUserReplies(int id)
+    {
+        if (!await _service.ExistsWithIdAsync(id))
+        {
+            return NotFound();
+        }
+
+        var userWithReplies = await _service.GetUserIncludingReplies(id);
+        List<Reply> replies = userWithReplies.Replies.ToList();
+        var replyDto = _mapper.Map<List<ReadReplyDto>>(replies);
+        return replyDto;
     }
     
     [HttpPut("{id:int}/groups")]
