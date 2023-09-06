@@ -72,6 +72,7 @@ public static class SeedHelper
             Id = 1,
             CreatorId = 2,
             ReplyToId = 1,
+            CreatedDate = new DateTime(2023, 09, 03, 21, 0, 0),
             Body = "I think we should have drinks and scooby snacks"
         };
 
@@ -89,6 +90,7 @@ public static class SeedHelper
             {
                 Id = 1,
                 Name = "Oscar",
+                Email = "oscar@test.com",
                 AvatarURL = "https://temashopse.b-cdn.net/media/catalog/product/cache/cat_resized/1200/0/s/h/shrek_r_maskeraddrakt_maskeraddrakter_maskeradklader_for_man.jpg",
                 Bio = "Shrek/Kong lover",
                 FunFact = "Loves Shrek and Kong",
@@ -98,6 +100,7 @@ public static class SeedHelper
             {
                 Id = 2,
                 Name = "Simon",
+                Email = "simon@test.com",
                 AvatarURL = "https://preview.redd.it/ufc-fight-night-shrek-vs-adam-sandler-v0-d3r78jgnhmv91.jpg?width=512&format=pjpg&auto=webp&s=2f93c0115d58a24e638a69f0a21fc571da99ac55",
                 Bio = "Hello I'm Simon and I love HAVREFLARN med choklad",
                 FunFact = "Cookie lover XD",
@@ -107,6 +110,7 @@ public static class SeedHelper
             {
                 Id = 3,
                 Name = "Erik",
+                Email = "erik@test.com",
                 AvatarURL = "https://pbs.twimg.com/profile_images/1342617687663521793/4lVjmcIk_400x400.jpg",
                 Bio = "Erik aka MuminLover1337",
                 FunFact = "I LOVE MUUUUMIN!",

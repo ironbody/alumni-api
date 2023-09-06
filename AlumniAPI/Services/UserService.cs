@@ -74,4 +74,25 @@ public class UserService: IUserService
             .Where(user => user.Id == id)
             .FirstAsync();
     }
+
+    public async Task<User?> GetUserByEmail(string email)
+    {
+        var user = await _context.User.FirstOrDefaultAsync(u => u.Email == email);
+        return user;
+    }
+
+    public async Task<bool> CanAccessGroup(int userId, int groupId)
+    {
+        var group = await _context.Group
+            .Include(g => g.Users)
+            .FirstOrDefaultAsync(g => g.Id == groupId);
+
+        if (group is null)
+        {
+            return false;
+        }
+
+        var result = group.Users.Any(u => u.Id == userId);
+        return result;
+    }
 }

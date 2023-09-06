@@ -46,6 +46,8 @@ builder.Services.AddDbContext<AlumniDbContext>(opt =>
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IDirectMessageService, DirectMessageService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
+builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<IReplyService, ReplyService>();
 
 
 var app = builder.Build();

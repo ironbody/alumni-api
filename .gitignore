@@ -6,3 +6,5 @@ riderModule.iml
 
 AlumniAPI/appsettings.Development.json
 AlumniAPI/.env
+
+.idea/.idea.AlumniAPI/.idea/
