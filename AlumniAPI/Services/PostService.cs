@@ -61,4 +61,36 @@ public class PostService : IPostService
         _context.Remove(entity);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<IEnumerable<Post>> GetAllPostsVisibleToUser(int userId)
+    {
+        var user = await _context.User
+            .Include(u => u.Groups)
+            .ThenInclude(g => g.Posts)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user is null)
+        {
+            return Enumerable.Empty<Post>();
+        }
+
+        var posts = user.Groups.SelectMany(g => g.Posts);
+        return posts;
+    }
+
+    public async Task<bool> PostIsVisibleToUser(int postId, int userId)
+    {
+        var user = await _context.User
+            .Include(u => u.Groups)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+        
+        var post = await _context.Post.FindAsync(postId);
+
+        if (user is null || post is null)
+        {
+            return false;
+        }
+
+        return user.Groups.Any(g => g.Id == post.GroupId);
+    }
 }

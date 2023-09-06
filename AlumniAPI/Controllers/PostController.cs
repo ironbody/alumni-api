@@ -1,13 +1,9 @@
-﻿using System.Runtime.InteropServices.ComTypes;
-using System.Security.Claims;
-using AlumniAPI.DTOs.Post;
+﻿using AlumniAPI.DTOs.Post;
 using AlumniAPI.DTOs.Post.Reply;
-using AlumniAPI.Extensions;
 using AlumniAPI.Models;
 using AlumniAPI.Services.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AlumniAPI.Controllers;
@@ -22,7 +18,11 @@ public class PostController : ControllerBase
     private IReplyService _replyService;
     private IMapper _mapper;
 
-    public PostController(IPostService postService, IUserService userService,IReplyService replyService, IMapper mapper)
+    private const string UserWithEmailNotFoundMessage =
+        "No user found with the email from the token. Make sure to call /user/check before you call this route.";
+
+    public PostController(IPostService postService, IUserService userService, IReplyService replyService,
+        IMapper mapper)
     {
         _postService = postService;
         _userService = userService;
@@ -33,7 +33,13 @@ public class PostController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ReadPostDto>>> GetAllPosts()
     {
-        var results = await _postService.GetAllAsync();
+        var user = await RetrieveUser();
+        if (user is null)
+        {
+            return BadRequest(UserWithEmailNotFoundMessage);
+        }
+
+        var results = await _postService.GetAllPostsVisibleToUser(user.Id);
         var mapped = _mapper.Map<IEnumerable<ReadPostDto>>(results);
         return Ok(mapped);
     }
@@ -41,6 +47,12 @@ public class PostController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<ActionResult<ReadPostDto>> GetPostById(int id)
     {
+        var user = await RetrieveUser();
+        if (user is null)
+        {
+            return BadRequest(UserWithEmailNotFoundMessage);
+        }
+
         if (!await _postService.ExistsWithIdAsync(id))
         {
             return NotFound();
@@ -52,6 +64,11 @@ public class PostController : ControllerBase
             return NotFound();
         }
 
+        if (!await _postService.PostIsVisibleToUser(result.Id, user.Id))
+        {
+            return Forbid();
+        }
+
         var mapped = _mapper.Map<ReadPostDto>(result);
         return Ok(mapped);
     }
@@ -59,12 +76,10 @@ public class PostController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<ReadPostDto>> CreateNewPost(CreatePostDto dto)
     {
-        var email = HttpContext.GetUserEmail();
-        var user = await _userService.GetUserByEmail(email);
+        var user = await RetrieveUser();
         if (user is null)
         {
-            return BadRequest(
-                "No user found with the email from the token. Make sure to call /user/check before you call this route.");
+            return BadRequest(UserWithEmailNotFoundMessage);
         }
 
         if (!await _userService.CanAccessGroup(user.Id, dto.GroupId))
@@ -87,10 +102,21 @@ public class PostController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<ActionResult> EditPost(int id, EditPostDto dto)
     {
+        var user = await RetrieveUser();
+        if (user is null)
+        {
+            return BadRequest(UserWithEmailNotFoundMessage);
+        }
+
         var post = await _postService.GetByIdAsync(id);
         if (post is null)
         {
             return NotFound();
+        }
+
+        if (post.CreatorId != user.Id)
+        {
+            return Forbid();
         }
 
         var info = _mapper.Map<EventInfo?>(dto.EventInfo);
@@ -107,10 +133,21 @@ public class PostController : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<ActionResult> DeletePost(int id)
     {
+        var user = await RetrieveUser();
+        if (user is null)
+        {
+            return BadRequest(UserWithEmailNotFoundMessage);
+        }
+
         var post = await _postService.GetByIdAsync(id);
         if (post is null)
         {
             return NotFound();
+        }
+
+        if (post.CreatorId != user.Id)
+        {
+            return Forbid();
         }
 
         await _postService.DeleteAsync(post);
@@ -121,10 +158,21 @@ public class PostController : ControllerBase
     [HttpGet("{postId:int}/reply")]
     public async Task<ActionResult<IEnumerable<ReadReplyDto>>> GetReplies(int postId)
     {
+        var user = await RetrieveUser();
+        if (user is null)
+        {
+            return BadRequest(UserWithEmailNotFoundMessage);
+        }
+
         var post = await _postService.GetByIdAsync(postId);
         if (post is null)
         {
             return NotFound();
+        }
+
+        if (!await _postService.PostIsVisibleToUser(post.Id, user.Id))
+        {
+            return Forbid();
         }
 
         var mappedReplies = _mapper.Map<List<ReadReplyDto>>(post.Replies);
@@ -134,12 +182,10 @@ public class PostController : ControllerBase
     [HttpPost("{postId:int}/reply")]
     public async Task<ActionResult<ReadReplyDto>> PostReply(int postId, CreateReplyDto dto)
     {
-        var email = HttpContext.GetUserEmail();
-        var user = await _userService.GetUserByEmail(email);
+        var user = await RetrieveUser();
         if (user is null)
         {
-            return BadRequest(
-                "No user found with the email from the token. Make sure to call /user/check before you call this route.");
+            return BadRequest(UserWithEmailNotFoundMessage);
         }
 
         var post = await _postService.GetByIdAsync(postId);
@@ -148,7 +194,7 @@ public class PostController : ControllerBase
             return NotFound();
         }
 
-        if (!await _userService.CanAccessGroup(user.Id, post.GroupId))
+        if (!await _postService.PostIsVisibleToUser(post.Id, user.Id))
         {
             return Forbid();
         }
@@ -160,7 +206,7 @@ public class PostController : ControllerBase
             CreatedDate = DateTime.Now,
             Body = dto.Body,
         };
-        
+
         post.Replies.Add(newReply);
         await _postService.UpdateAsync(post);
 
@@ -171,23 +217,19 @@ public class PostController : ControllerBase
     [HttpPut("{postId:int}/reply/{replyId:int}")]
     public async Task<ActionResult> EditReply(int postId, int replyId, EditReplyDto dto)
     {
-
-        var email = HttpContext.GetUserEmail();
-        var user = await _userService.GetUserByEmail(email);
-
+        var user = await RetrieveUser();
         if (user is null)
         {
-            return BadRequest(
-                "No user found with the email from the token. Make sure to call /user/check before you call this route.");
+            return BadRequest(UserWithEmailNotFoundMessage);
         }
-        
+
         var post = await _postService.GetByIdAsync(postId);
         if (post is null)
         {
             return NotFound("Post doesn't exist");
         }
-        
-        if (!await _userService.CanAccessGroup(user.Id, post.GroupId))
+
+        if (!await _postService.PostIsVisibleToUser(post.Id, user.Id))
         {
             return Forbid();
         }
@@ -215,27 +257,23 @@ public class PostController : ControllerBase
         // WHY THE FUCK IS THERE SO MUCH CODE JUST FOR VALIDATION AAAAAAA
         return Ok();
     }
-    
+
     [HttpDelete("{postId:int}/reply/{replyId:int}")]
     public async Task<ActionResult> DeleteReply(int postId, int replyId)
     {
-
-        var email = HttpContext.GetUserEmail();
-        var user = await _userService.GetUserByEmail(email);
-
+        var user = await RetrieveUser();
         if (user is null)
         {
-            return BadRequest(
-                "No user found with the email from the token. Make sure to call /user/check before you call this route.");
+            return BadRequest(UserWithEmailNotFoundMessage);
         }
-        
+
         var post = await _postService.GetByIdAsync(postId);
         if (post is null)
         {
             return NotFound("Post doesn't exist");
         }
-        
-        if (!await _userService.CanAccessGroup(user.Id, post.GroupId))
+
+        if (!await _postService.PostIsVisibleToUser(post.Id, user.Id))
         {
             return Forbid();
         }
@@ -260,5 +298,11 @@ public class PostController : ControllerBase
 
         // WHY THE FUCK IS THERE SO MUCH CODE JUST FOR VALIDATION AAAAAAA
         return Ok();
+    }
+
+    private async Task<User?> RetrieveUser()
+    {
+        var user = await RetrieveUser();
+        return user;
     }
 }
