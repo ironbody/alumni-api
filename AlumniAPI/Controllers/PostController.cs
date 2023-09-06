@@ -1,5 +1,6 @@
 ﻿using AlumniAPI.DTOs.Post;
 using AlumniAPI.DTOs.Post.Reply;
+using AlumniAPI.Extensions;
 using AlumniAPI.Models;
 using AlumniAPI.Services.Interfaces;
 using AutoMapper;
@@ -302,7 +303,8 @@ public class PostController : ControllerBase
 
     private async Task<User?> RetrieveUser()
     {
-        var user = await RetrieveUser();
+        var email = HttpContext.GetUserEmail();
+        var user = await _userService.GetUserByEmail(email);
         return user;
     }
 }
