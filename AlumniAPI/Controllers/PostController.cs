@@ -163,7 +163,9 @@ public class PostController : ControllerBase
         
         post.Replies.Add(newReply);
         await _postService.UpdateAsync(post);
-        return Ok(newReply);
+
+        var mapped = _mapper.Map<ReadReplyDto>(newReply);
+        return Ok(mapped);
     }
 
     [HttpPut("{postId:int}/reply/{replyId:int}")]
