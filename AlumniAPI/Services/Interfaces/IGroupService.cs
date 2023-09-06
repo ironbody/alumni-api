@@ -5,5 +5,8 @@ namespace AlumniAPI.Services.Interfaces;
 
 public interface IGroupService: IRepository<Group>
 {
-    
+    Task<Group> GetGroupIncludingUsers(int id);
+    Task<Group> GetGroupIncludingPosts(int id);
+    Task UpdateGroupUsers(Group group, IEnumerable<int> userIds);
+    Task UpdateGroupPosts(Group group, IEnumerable<int> postIds);
 }

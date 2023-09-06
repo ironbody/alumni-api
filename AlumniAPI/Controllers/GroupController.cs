@@ -1,7 +1,10 @@
 ﻿using System.Net.Mime;
 using AlumniAPI.DTOs.Group;
+using AlumniAPI.DTOs.User;
+using AlumniAPI.Models;
 using AlumniAPI.Services.Interfaces;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Group = AlumniAPI.Models.Group;
@@ -13,6 +16,7 @@ namespace AlumniAPI.Controllers;
 [Produces(MediaTypeNames.Application.Json)]
 [Consumes(MediaTypeNames.Application.Json)]
 [ApiConventionType(typeof(DefaultApiConventions))]
+[Authorize]
 public class GroupController: ControllerBase
 {
     private readonly IGroupService _service;
@@ -127,6 +131,55 @@ public class GroupController: ControllerBase
             return NotFound();
         }
         await _service.DeleteAsync(group);
+        return NoContent();
+    }
+    
+    [HttpGet("{id:int}/Users")]
+    public async Task<ActionResult<IEnumerable<ReadUserDto>>> GetGroupUsers(int id)
+    {
+        if (!await _service.ExistsWithIdAsync(id))
+        {
+            return NotFound();
+        }
+
+        var groupWithUsers = await _service.GetGroupIncludingUsers(id);
+        List<User> users = groupWithUsers.Users.ToList();
+        var userDto = _mapper.Map<List<ReadUserDto>>(users);
+        return userDto;
+    }
+    
+    [HttpGet("{id:int}/Posts")]
+    public async Task<ActionResult<IEnumerable<ReadUserDto>>> GetGroupPosts(int id)
+    {
+        if (!await _service.ExistsWithIdAsync(id))
+        {
+            return NotFound();
+        }
+
+        var groupWithPosts = await _service.GetGroupIncludingPosts(id);
+        List<User> users = groupWithPosts.Users.ToList();
+        var userDto = _mapper.Map<List<ReadUserDto>>(users);
+        return userDto;
+    }
+    
+    [HttpPut("{id:int}/Users")]
+    public async Task<ActionResult> UpdateUserGroups(int id, IEnumerable<int> userIds)
+    {
+        if (!await _service.ExistsWithIdAsync(id))
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            var groupToUpdate = await _service.GetGroupIncludingUsers(id);
+            await _service.UpdateGroupUsers(groupToUpdate, userIds);
+        }
+        catch(KeyNotFoundException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+
         return NoContent();
     }
 }

@@ -46,4 +46,56 @@ public class GroupService: IGroupService
         _context.Group.Remove(entity);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<Group> GetGroupIncludingUsers(int id)
+    {
+        return await _context.Group
+            .Include(group => group.Users)
+            .Where(group => group.Id == id)
+            .FirstAsync();
+    }
+
+    public async Task<Group> GetGroupIncludingPosts(int id)
+    {
+        return await _context.Group
+            .Include(group => group.Posts)
+            .Where(group => group.Id == id)
+            .FirstAsync();
+    }
+
+    public async Task UpdateGroupUsers(Group group, IEnumerable<int> userIds)
+    {
+        var newUsers = new List<User>();
+        foreach (var userId in userIds)
+        {
+            var user = await _context.User.FindAsync(userId);
+            if (user == null)
+            {
+                throw new KeyNotFoundException($"User with id {userId} does not exist.");
+            }
+            newUsers.Add(user);
+        }
+
+        group.Users = newUsers;
+
+        await UpdateAsync(group);
+    }
+
+    public async Task UpdateGroupPosts(Group group, IEnumerable<int> postIds)
+    {
+        var newPosts = new List<Post>();
+        foreach (var postId in postIds)
+        {
+            var post = await _context.Post.FindAsync(postId);
+            if (post == null)
+            {
+                throw new KeyNotFoundException($"Post with id {postId} does not exist.");
+            }
+            newPosts.Add(post);
+        }
+
+        group.Posts = newPosts;
+
+        await UpdateAsync(group);
+    }
 }
