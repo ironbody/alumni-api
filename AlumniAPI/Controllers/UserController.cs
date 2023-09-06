@@ -241,6 +241,47 @@ public class UserController : ControllerBase
         return NoContent();
     }
 
+    [HttpPut("{id:int}/posts")]
+    public async Task<ActionResult> UpdateUserPosts(int id, IEnumerable<int> postIds)
+    {
+        if (!await _service.ExistsWithIdAsync(id))
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            var userToUpdate = await _service.GetUserIncludingPosts(id);
+            await _service.UpdateUserPosts(userToUpdate, postIds);
+        }
+        catch(KeyNotFoundException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+
+        return NoContent();
+    }
+    
+    [HttpPut("{id:int}/replies")]
+    public async Task<ActionResult> UpdateUserReplies(int id, IEnumerable<int> repliesIds)
+    {
+        if (!await _service.ExistsWithIdAsync(id))
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            var userToUpdate = await _service.GetUserIncludingReplies(id);
+            await _service.UpdateUserReplies(userToUpdate, repliesIds);
+        }
+        catch(KeyNotFoundException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+
+        return NoContent();
+    }
 
     private  List<List<DirectMessage>> GetUserConvos(int id, User userWithMessages)
     {

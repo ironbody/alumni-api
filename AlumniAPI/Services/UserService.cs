@@ -74,7 +74,15 @@ public class UserService: IUserService
             .Where(user => user.Id == id)
             .FirstAsync();
     }
-    
+
+    public async Task<User> GetUserIncludingReplies(int id)
+    {
+        return await _context.User
+            .Include(user => user.Replies)
+            .Where(user => user.Id == id)
+            .FirstAsync();
+    }
+
 
     public async Task UpdateUserGroups(User user, IEnumerable<int> groupIds)
     {
@@ -90,6 +98,42 @@ public class UserService: IUserService
         }
 
         user.Groups = newGroups;
+
+        await UpdateAsync(user);
+    }
+
+    public async Task UpdateUserPosts(User user, IEnumerable<int> postIds)
+    {
+        var newPosts = new List<Post>();
+        foreach (var postId in postIds)
+        {
+            var post = await _context.Post.FindAsync(postId);
+            if (post == null)
+            {
+                throw new KeyNotFoundException($"Post with id {postId} does not exist.");
+            }
+            newPosts.Add(post);
+        }
+
+        user.Posts = newPosts;
+
+        await UpdateAsync(user);
+    }
+
+    public async Task UpdateUserReplies(User user, IEnumerable<int> repliesIds)
+    {
+        var newReplies = new List<Reply>();
+        foreach (var replyId in repliesIds)
+        {
+            var reply = await _context.Reply.FindAsync(replyId);
+            if (reply == null)
+            {
+                throw new KeyNotFoundException($"Reply with id {replyId} does not exist.");
+            }
+            newReplies.Add(reply);
+        }
+
+        user.Replies = newReplies;
 
         await UpdateAsync(user);
     }
