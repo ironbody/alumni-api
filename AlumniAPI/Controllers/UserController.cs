@@ -219,6 +219,27 @@ public class UserController : ControllerBase
         var groupsDto = _mapper.Map<List<ReadGroupDto>>(groups);
         return groupsDto;
     }
+    
+    [HttpPut("{id:int}/groups")]
+    public async Task<ActionResult> UpdateUserGroups(int id, IEnumerable<int> groupIds)
+    {
+        if (!await _service.ExistsWithIdAsync(id))
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            var userToUpdate = await _service.GetUserIncludingGroups(id);
+            await _service.UpdateUserGroups(userToUpdate, groupIds);
+        }
+        catch(KeyNotFoundException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+
+        return NoContent();
+    }
 
 
     private  List<List<DirectMessage>> GetUserConvos(int id, User userWithMessages)

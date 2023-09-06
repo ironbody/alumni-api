@@ -74,4 +74,23 @@ public class UserService: IUserService
             .Where(user => user.Id == id)
             .FirstAsync();
     }
+    
+
+    public async Task UpdateUserGroups(User user, IEnumerable<int> groupIds)
+    {
+        var newGroups = new List<Group>();
+        foreach (var groupId in groupIds)
+        {
+            var group = await _context.Group.FindAsync(groupId);
+            if (group == null)
+            {
+                throw new KeyNotFoundException($"Group with id {groupId} does not exist.");
+            }
+            newGroups.Add(group);
+        }
+
+        user.Groups = newGroups;
+
+        await UpdateAsync(user);
+    }
 }
