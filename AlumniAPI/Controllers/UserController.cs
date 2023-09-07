@@ -9,7 +9,6 @@ using AlumniAPI.Models;
 using AlumniAPI.Services.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -175,6 +174,11 @@ public class UserController : ControllerBase
         List<List<DirectMessage>> messages =  GetUserConvos(id, userWithMessages);
         //Order by latest message in convo
         messages = messages.OrderByDescending(e => e[e.Count-1].SentTime).ToList();
+        //Only user last message
+        foreach (var convo in messages)
+        {
+            convo.RemoveRange(1,convo.Count-1);
+        }
         var dmDto = _mapper.Map<List<List<ReadDirectMessageDto>>>(messages);
         return dmDto;
     }
@@ -182,24 +186,28 @@ public class UserController : ControllerBase
     
     
     /// <summary>
-    /// Get specific conversation between two users
+    /// Get specific conversation between users
     /// </summary>
-    /// <param name="id">The id of the first user</param>
-    /// <param name="id2">The id of the other user</param>
+    /// <param name="id">The id of the other user</param>
     /// <returns>A list of direct messages</returns>
-    [HttpGet("{id:int}/messages/{id2:int}")]
-    public async Task<ActionResult<IEnumerable<ReadDirectMessageDto>>> GetUserMessagesForSpecificUser(int id, int id2)
+    [HttpGet("messages/{id:int}")]
+    public async Task<ActionResult<IEnumerable<ReadDirectMessageDto>>> GetUserMessagesForSpecificUser(int id)
     {
 
         if (!await _service.ExistsWithIdAsync(id))
         {
             return NotFound();
         }
+        
+        // Get logged in user
+        string email = HttpContext.GetUserEmail();
+        var user = await _service.GetUserByEmail(email);
+        if (user is null) return NotFound();
 
-        var userWithMessages = await _service.GetUserIncludingMessages(id);
-        List<List<DirectMessage>> messages =  GetUserConvos(id, userWithMessages);
+        var userWithMessages = await _service.GetUserIncludingMessages(user.Id);
+        List<List<DirectMessage>> messages =  GetUserConvos(user.Id, userWithMessages);
         //Order by latest message in convo
-        messages = messages.OrderByDescending(e => e[e.Count-1].SentTime).ToList().Where(e => e[0].RecipientId == id2 || e[0].SenderId == id2).ToList();
+        messages = messages.ToList().Where(e => e[0].RecipientId == id || e[0].SenderId == id).ToList();
         if (messages.Count <= 0)
         {
             return BadRequest();
@@ -332,7 +340,6 @@ public class UserController : ControllerBase
 
     
     [HttpPost("check")]
-    [Authorize]
     public async Task<ActionResult> CheckUser()
     {
         var email = HttpContext.GetUserEmail();
@@ -381,11 +388,8 @@ public class UserController : ControllerBase
             {
                 messages[i].Add(dm);
             }
-            messages[i] = new List<DirectMessage>(messages[i].OrderByDescending(e => e.SentTime));
-            if (messages[i].Count() > 1)
-            {
-                messages[i].RemoveRange(1,messages[i].Count-1);
-            }
+            messages[i] = new List<DirectMessage>(messages[i].OrderBy(e => e.SentTime));
+            
             i++;
         }
 
