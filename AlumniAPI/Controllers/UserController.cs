@@ -175,6 +175,11 @@ public class UserController : ControllerBase
         List<List<DirectMessage>> messages =  GetUserConvos(id, userWithMessages);
         //Order by latest message in convo
         messages = messages.OrderByDescending(e => e[e.Count-1].SentTime).ToList();
+        //Only user last message
+        foreach (var convo in messages)
+        {
+            convo.RemoveRange(1,convo.Count-1);
+        }
         var dmDto = _mapper.Map<List<List<ReadDirectMessageDto>>>(messages);
         return dmDto;
     }
@@ -382,10 +387,7 @@ public class UserController : ControllerBase
                 messages[i].Add(dm);
             }
             messages[i] = new List<DirectMessage>(messages[i].OrderByDescending(e => e.SentTime));
-            if (messages[i].Count() > 1)
-            {
-                messages[i].RemoveRange(1,messages[i].Count-1);
-            }
+            
             i++;
         }
 
