@@ -3,6 +3,7 @@ using AlumniAPI.DTOs.DirectMessage;
 using AlumniAPI.Models;
 using AlumniAPI.Services.Interfaces;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +14,7 @@ namespace AlumniAPI.Controllers;
 [Produces(MediaTypeNames.Application.Json)]
 [Consumes(MediaTypeNames.Application.Json)]
 [ApiConventionType(typeof(DefaultApiConventions))]
+[Authorize]
 public class DirectMessageController: ControllerBase
 {
     private readonly IDirectMessageService _service;
