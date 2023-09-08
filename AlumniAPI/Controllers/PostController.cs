@@ -89,7 +89,7 @@ public class PostController : ControllerBase
         }
 
         var mapped = _mapper.Map<Post>(dto);
-        mapped.CreatedDateTime = DateTime.Now;
+        mapped.CreatedDateTime = DateTime.UtcNow;
         mapped.CreatorId = user.Id;
 
         var newId = await _postService.AddAsync(mapped);
@@ -204,7 +204,7 @@ public class PostController : ControllerBase
         {
             CreatorId = user.Id,
             ReplyToId = post.Id,
-            CreatedDate = DateTime.Now,
+            CreatedDate = DateTime.UtcNow,
             Body = dto.Body,
         };
 
