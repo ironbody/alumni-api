@@ -1,5 +1,6 @@
 ﻿using System.Net.Mime;
 using AlumniAPI.DTOs.Group;
+using AlumniAPI.DTOs.Post;
 using AlumniAPI.DTOs.User;
 using AlumniAPI.Models;
 using AlumniAPI.Services.Interfaces;
@@ -149,7 +150,7 @@ public class GroupController: ControllerBase
     }
     
     [HttpGet("{id:int}/Posts")]
-    public async Task<ActionResult<IEnumerable<ReadUserDto>>> GetGroupPosts(int id)
+    public async Task<ActionResult<IEnumerable<ReadPostDto>>> GetGroupPosts(int id)
     {
         if (!await _service.ExistsWithIdAsync(id))
         {
@@ -157,9 +158,9 @@ public class GroupController: ControllerBase
         }
 
         var groupWithPosts = await _service.GetGroupIncludingPosts(id);
-        List<User> users = groupWithPosts.Users.ToList();
-        var userDto = _mapper.Map<List<ReadUserDto>>(users);
-        return userDto;
+        List<Post> posts = groupWithPosts.Posts.ToList();
+        var postDto = _mapper.Map<List<ReadPostDto>>(posts);
+        return postDto;
     }
     
     [HttpPut("{id:int}/Users")]
