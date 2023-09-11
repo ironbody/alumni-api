@@ -25,6 +25,9 @@ public class UserController : ControllerBase
     private readonly IUserService _service;
     private readonly IMapper _mapper;
 
+    private const string UserWithEmailNotFoundMessage =
+        "No user found with the email from the token. Make sure to call /user/check before you call this route.";
+
     public UserController(IUserService service, IMapper mapper)
     {
         _mapper = mapper;
@@ -164,27 +167,25 @@ public class UserController : ControllerBase
     [HttpGet("{id:int}/messages")]
     public async Task<ActionResult<IEnumerable<IEnumerable<ReadDirectMessageDto>>>> GetUserMessages(int id)
     {
-
         if (!await _service.ExistsWithIdAsync(id))
         {
             return NotFound();
         }
 
         var userWithMessages = await _service.GetUserIncludingMessages(id);
-        List<List<DirectMessage>> messages =  GetUserConvos(id, userWithMessages);
+        List<List<DirectMessage>> messages = GetUserConvos(id, userWithMessages);
         //Order by latest message in convo
-        messages = messages.OrderByDescending(e => e[e.Count-1].SentTime).ToList();
+        messages = messages.OrderByDescending(e => e[e.Count - 1].SentTime).ToList();
         //Only user last message
         foreach (var convo in messages)
         {
-            convo.RemoveRange(1,convo.Count-1);
+            convo.RemoveRange(1, convo.Count - 1);
         }
+
         var dmDto = _mapper.Map<List<List<ReadDirectMessageDto>>>(messages);
         return dmDto;
     }
-    
-    
-    
+
     /// <summary>
     /// Get specific conversation between users
     /// </summary>
@@ -193,30 +194,50 @@ public class UserController : ControllerBase
     [HttpGet("messages/{id:int}")]
     public async Task<ActionResult<IEnumerable<ReadDirectMessageDto>>> GetUserMessagesForSpecificUser(int id)
     {
-
         if (!await _service.ExistsWithIdAsync(id))
         {
             return NotFound();
         }
-        
+
         // Get logged in user
         string email = HttpContext.GetUserEmail();
         var user = await _service.GetUserByEmail(email);
         if (user is null) return NotFound();
 
         var userWithMessages = await _service.GetUserIncludingMessages(user.Id);
-        List<List<DirectMessage>> messages =  GetUserConvos(user.Id, userWithMessages);
+        List<List<DirectMessage>> messages = GetUserConvos(user.Id, userWithMessages);
         //Order by latest message in convo
         messages = messages.ToList().Where(e => e[0].RecipientId == id || e[0].SenderId == id).ToList();
         if (messages.Count <= 0)
         {
             return BadRequest();
         }
+
         var dmDto = _mapper.Map<List<ReadDirectMessageDto>>(messages[0]);
         return dmDto;
     }
-    
-    
+
+    /// <summary>
+    /// Get all groups a user is in using email from the JWT
+    /// </summary>
+    /// <param name="id">The id of the user</param>
+    /// <returns>A list of groups</returns>
+    [HttpGet("groups")]
+    public async Task<ActionResult<IEnumerable<ReadGroupDto>>> GetJwtUserGroups()
+    {
+        var email = HttpContext.GetUserEmail();
+        var user = await _service.GetUserByEmail(email);
+        if (user is null)
+        {
+            return BadRequest(UserWithEmailNotFoundMessage);
+        }
+
+        var userWithGroups = await _service.GetUserIncludingGroups(user.Id);
+        List<Group> groups = userWithGroups.Groups.ToList();
+        var groupsDto = _mapper.Map<List<ReadGroupDto>>(groups);
+        return groupsDto;
+    }
+
     /// <summary>
     /// Get all groups a user is in
     /// </summary>
@@ -235,8 +256,7 @@ public class UserController : ControllerBase
         var groupsDto = _mapper.Map<List<ReadGroupDto>>(groups);
         return groupsDto;
     }
-    
-    
+
     /// <summary>
     /// Get all posts from a user
     /// </summary>
@@ -255,7 +275,7 @@ public class UserController : ControllerBase
         var postsDto = _mapper.Map<List<ReadPostDto>>(posts);
         return postsDto;
     }
-    
+
     /// <summary>
     /// Get all posts from a user
     /// </summary>
@@ -274,7 +294,7 @@ public class UserController : ControllerBase
         var replyDto = _mapper.Map<List<ReadReplyDto>>(replies);
         return replyDto;
     }
-    
+
     [HttpPut("{id:int}/groups")]
     public async Task<ActionResult> UpdateUserGroups(int id, IEnumerable<int> groupIds)
     {
@@ -288,7 +308,7 @@ public class UserController : ControllerBase
             var userToUpdate = await _service.GetUserIncludingGroups(id);
             await _service.UpdateUserGroups(userToUpdate, groupIds);
         }
-        catch(KeyNotFoundException ex)
+        catch (KeyNotFoundException ex)
         {
             return BadRequest(ex.Message);
         }
@@ -309,14 +329,14 @@ public class UserController : ControllerBase
             var userToUpdate = await _service.GetUserIncludingPosts(id);
             await _service.UpdateUserPosts(userToUpdate, postIds);
         }
-        catch(KeyNotFoundException ex)
+        catch (KeyNotFoundException ex)
         {
             return BadRequest(ex.Message);
         }
 
         return NoContent();
     }
-    
+
     [HttpPut("{id:int}/replies")]
     public async Task<ActionResult> UpdateUserReplies(int id, IEnumerable<int> repliesIds)
     {
@@ -330,7 +350,7 @@ public class UserController : ControllerBase
             var userToUpdate = await _service.GetUserIncludingReplies(id);
             await _service.UpdateUserReplies(userToUpdate, repliesIds);
         }
-        catch(KeyNotFoundException ex)
+        catch (KeyNotFoundException ex)
         {
             return BadRequest(ex.Message);
         }
@@ -338,14 +358,13 @@ public class UserController : ControllerBase
         return NoContent();
     }
 
-    
     [HttpPost("check")]
     public async Task<ActionResult> CheckUser()
     {
         var email = HttpContext.GetUserEmail();
         var user = await _service.GetUserByEmail(email);
         if (user is not null) return Ok();
-        
+
         var name = HttpContext.GetUserName();
         var newUser = new User()
         {
@@ -357,10 +376,9 @@ public class UserController : ControllerBase
 
         return Ok();
     }
-    
-    private  List<List<DirectMessage>> GetUserConvos(int id, User userWithMessages)
-    {
 
+    private List<List<DirectMessage>> GetUserConvos(int id, User userWithMessages)
+    {
         Dictionary<int, List<DirectMessage>> dmMap = new Dictionary<int, List<DirectMessage>>();
         foreach (var dm in userWithMessages.ReceivedMessages)
         {
@@ -368,14 +386,17 @@ public class UserController : ControllerBase
             {
                 dmMap.Add(dm.SenderId, new List<DirectMessage>());
             }
+
             dmMap[dm.SenderId].Add(dm);
         }
+
         foreach (var dm in userWithMessages.SentMessages)
         {
             if (!dmMap.ContainsKey(dm.RecipientId))
             {
                 dmMap.Add(dm.RecipientId, new List<DirectMessage>());
             }
+
             dmMap[dm.RecipientId].Add(dm);
         }
 
@@ -391,13 +412,10 @@ public class UserController : ControllerBase
 
             messages[i] = new List<DirectMessage>(messages[i].OrderBy(e => e.SentTime));
 
-            
+
             i++;
         }
 
         return messages;
     }
-    
-
-
 }
