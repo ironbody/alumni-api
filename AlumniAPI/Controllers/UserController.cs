@@ -116,7 +116,7 @@ public class UserController : ControllerBase
             }
         }
 
-        return NotFound();
+        return NoContent();
     }
 
     /// <summary>
