@@ -186,7 +186,6 @@ public class UserController : ControllerBase
         return dmDto;
     }
 
-
     /// <summary>
     /// Get specific conversation between users
     /// </summary>
@@ -257,7 +256,6 @@ public class UserController : ControllerBase
         var groupsDto = _mapper.Map<List<ReadGroupDto>>(groups);
         return groupsDto;
     }
-
 
     /// <summary>
     /// Get all posts from a user
@@ -359,7 +357,6 @@ public class UserController : ControllerBase
 
         return NoContent();
     }
-
 
     [HttpPost("check")]
     public async Task<ActionResult> CheckUser()
