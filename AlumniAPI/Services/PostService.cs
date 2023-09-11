@@ -66,8 +66,11 @@ public class PostService : IPostService
     {
         var user = await _context.User
             .Include(u => u.Groups)
-            .ThenInclude(g => g.Posts)
-            .ThenInclude(p => p.Creator)
+                .ThenInclude(g => g.Posts)
+                .ThenInclude(p => p.Creator)
+            .Include(u => u.Groups)
+                .ThenInclude(g => g.Posts)
+                .ThenInclude(p => p.EventInfo)
             .FirstOrDefaultAsync(u => u.Id == userId);
 
         if (user is null)
