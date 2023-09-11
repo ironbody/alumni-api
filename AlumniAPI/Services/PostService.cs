@@ -66,11 +66,11 @@ public class PostService : IPostService
     {
         var user = await _context.User
             .Include(u => u.Groups)
-                .ThenInclude(g => g.Posts)
-                .ThenInclude(p => p.Creator)
+            .ThenInclude(g => g.Posts)
+            .ThenInclude(p => p.Creator)
             .Include(u => u.Groups)
-                .ThenInclude(g => g.Posts)
-                .ThenInclude(p => p.EventInfo)
+            .ThenInclude(g => g.Posts)
+            .ThenInclude(p => p.EventInfo)
             .FirstOrDefaultAsync(u => u.Id == userId);
 
         if (user is null)
@@ -78,7 +78,10 @@ public class PostService : IPostService
             return Enumerable.Empty<Post>();
         }
 
-        var posts = user.Groups.SelectMany(g => g.Posts);
+        var posts = user
+            .Groups
+            .SelectMany(g => g.Posts)
+            .OrderByDescending(p => p.CreatedDateTime < p.EditedDateTime ? p.EditedDateTime : p.CreatedDateTime);
         return posts;
     }
 
@@ -87,7 +90,7 @@ public class PostService : IPostService
         var user = await _context.User
             .Include(u => u.Groups)
             .FirstOrDefaultAsync(u => u.Id == userId);
-        
+
         var post = await _context.Post.FindAsync(postId);
 
         if (user is null || post is null)
