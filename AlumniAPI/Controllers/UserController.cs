@@ -159,6 +159,7 @@ public class UserController : ControllerBase
         return NoContent();
     }
 
+    // TODO: Make it so it shows JWT user's (Security)
     /// <summary>
     /// Get all conversations from a user
     /// </summary>
@@ -173,15 +174,14 @@ public class UserController : ControllerBase
         }
 
         var userWithMessages = await _service.GetUserIncludingMessages(id);
-        List<List<DirectMessage>> messages = GetUserConvos(id, userWithMessages);
+        List<List<DirectMessage>> messages =  GetUserConvos(userWithMessages);
         //Order by latest message in convo
-        messages = messages.OrderByDescending(e => e[e.Count - 1].SentTime).ToList();
+        messages = messages.OrderByDescending(e => e[e.Count-1].SentTime).ToList();
         //Only user last message
         foreach (var convo in messages)
         {
-            convo.RemoveRange(1, convo.Count - 1);
+            convo.RemoveRange(1,convo.Count-1);
         }
-
         var dmDto = _mapper.Map<List<List<ReadDirectMessageDto>>>(messages);
         return dmDto;
     }
@@ -194,6 +194,7 @@ public class UserController : ControllerBase
     [HttpGet("messages/{id:int}")]
     public async Task<ActionResult<IEnumerable<ReadDirectMessageDto>>> GetUserMessagesForSpecificUser(int id)
     {
+
         if (!await _service.ExistsWithIdAsync(id))
         {
             return NotFound();
@@ -205,14 +206,13 @@ public class UserController : ControllerBase
         if (user is null) return NotFound();
 
         var userWithMessages = await _service.GetUserIncludingMessages(user.Id);
-        List<List<DirectMessage>> messages = GetUserConvos(user.Id, userWithMessages);
+        List<List<DirectMessage>> messages =  GetUserConvos(userWithMessages);
         //Order by latest message in convo
         messages = messages.ToList().Where(e => e[0].RecipientId == id || e[0].SenderId == id).ToList();
         if (messages.Count <= 0)
         {
             return BadRequest();
         }
-
         var dmDto = _mapper.Map<List<ReadDirectMessageDto>>(messages[0]);
         return dmDto;
     }
@@ -357,15 +357,15 @@ public class UserController : ControllerBase
 
         return NoContent();
     }
-
+    
     [HttpPost("check")]
     public async Task<ActionResult> CheckUser()
     {
-        var email = HttpContext.GetUserEmail();
+        string email = HttpContext.GetUserEmail();
         var user = await _service.GetUserByEmail(email);
-        if (user is not null) return Ok();
-
-        var name = HttpContext.GetUserName();
+        if (user is not null) return Ok(_mapper.Map<ReadUserDto>(user));
+        
+        string name = HttpContext.GetUserName();
         var newUser = new User()
         {
             Email = email,
@@ -374,10 +374,27 @@ public class UserController : ControllerBase
 
         await _service.AddAsync(newUser);
 
-        return Ok();
+        return Ok(_mapper.Map<ReadUserDto>(newUser));
     }
 
-    private List<List<DirectMessage>> GetUserConvos(int id, User userWithMessages)
+    [HttpGet("chats")]
+    public async Task<ActionResult<string>> GetChats()
+    {
+        string email = HttpContext.GetUserEmail();
+        var user = await _service.GetUserByEmail(email);
+        if (user is null) return NotFound();
+
+        try
+        {
+            return Ok( _service.GetChats(user.Id).Result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+    
+    private  List<List<DirectMessage>> GetUserConvos(User userWithMessages)
     {
         Dictionary<int, List<DirectMessage>> dmMap = new Dictionary<int, List<DirectMessage>>();
         foreach (var dm in userWithMessages.ReceivedMessages)
@@ -409,10 +426,7 @@ public class UserController : ControllerBase
             {
                 messages[i].Add(dm);
             }
-
             messages[i] = new List<DirectMessage>(messages[i].OrderBy(e => e.SentTime));
-
-
             i++;
         }
 

@@ -1,20 +1,23 @@
-﻿using AlumniAPI.Services.Interfaces;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace AlumniAPI.Services;
 
+[Authorize]
 public class ChatSocketHub : Hub
 {
     public async Task JoinChat(int userId)
-    {
+    =>
         await Groups
             .AddToGroupAsync(Context.ConnectionId, userId.ToString());
-    }
     
-    public async Task SendMessageToAll(string message, int fromUserId, int toUserId)
+    public async Task SendMessageToUser(string body, int senderId, int recipientId)
     {
         await Clients
-            .Group(toUserId.ToString())
-            .SendAsync("ReceiveMessage", message, fromUserId);
+            .Group(senderId.ToString())
+            .SendAsync("ReceiveMessage", body, senderId, recipientId);
+        await Clients
+            .Group(recipientId.ToString())
+            .SendAsync("ReceiveMessage", body, senderId, recipientId);
     }
 }

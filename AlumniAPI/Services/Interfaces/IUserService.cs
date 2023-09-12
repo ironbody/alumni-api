@@ -5,7 +5,9 @@ namespace AlumniAPI.Services.Interfaces;
 
 public interface IUserService : IRepository<User>
 {
+    // TODO: Add ✨Documentation✨
     Task<User> GetUserIncludingMessages(int id);
+    Task<List<ConversationWithLatestMessage>> GetChats(int id);
     Task<User> GetUserIncludingGroups(int id);
     Task<User> GetUserIncludingPosts(int id);
     Task<User> GetUserIncludingReplies(int id);

@@ -158,4 +158,41 @@ public class UserService: IUserService
         var result = group.Users.Any(u => u.Id == userId);
         return result;
     }
+    public async Task<List<ConversationWithLatestMessage>> GetChats(int userId)
+    {
+        var conversations = _context.User
+            .Where(user => user.Id != userId)
+            .Select(user => new
+            {
+                User = user,
+                LatestMessage = user.SentMessages
+                    .Where(msg => msg.RecipientId == userId)
+                    .Concat(user.ReceivedMessages.Where(msg => msg.SenderId == userId))
+                    .OrderByDescending(msg => msg.SentTime)
+                    .FirstOrDefault()
+            })
+            .Where(conversation => conversation.LatestMessage != null)
+            .ToList()
+            .Select(conversation => new ConversationWithLatestMessage
+            {
+                UserId = conversation.User.Id,
+                Name = conversation.User.Name,
+                AvatarURL = conversation.User.AvatarURL,
+                Body = conversation.LatestMessage?.Body,
+                SentTime = conversation.LatestMessage?.SentTime ?? new()
+            })
+            .ToList();
+
+        return conversations;
+    }
+}
+
+public class ConversationWithLatestMessage
+{
+    public int UserId { get; set; }
+    public string? Name { get; set; }
+    public string? AvatarURL { get; set; }
+    public string? Body { get; set; }
+    public DateTime SentTime { get; set; }
+    
 }
