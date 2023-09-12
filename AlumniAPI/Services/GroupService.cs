@@ -59,6 +59,9 @@ public class GroupService: IGroupService
     {
         return await _context.Group
             .Include(group => group.Posts)
+            .ThenInclude(post => post.Creator)
+            .Include(group => group.Posts)
+            .ThenInclude(post => post.EventInfo)
             .Where(group => group.Id == id)
             .FirstAsync();
     }
