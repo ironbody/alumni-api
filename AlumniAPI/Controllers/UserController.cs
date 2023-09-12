@@ -404,7 +404,9 @@ public class UserController : ControllerBase
             {
                 messages[i].Add(dm);
             }
+
             messages[i] = new List<DirectMessage>(messages[i].OrderBy(e => e.SentTime));
+
             
             i++;
         }
