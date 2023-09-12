@@ -60,7 +60,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 return keys.Keys;
             },
             ValidIssuers = new List<string> { Environment.GetEnvironmentVariable("TOKEN_ISSUERURI") },
-            ValidAudience = "account"
+            ValidAudience = "account",
+        };
+        // Socket Authentication
+        opt.Events = new()
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/hubs/chat"))
+                    context.Token = accessToken;
+                return Task.CompletedTask;
+            }
         };
     });
 
@@ -97,6 +111,6 @@ app.UseCors(policyBuilder =>
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHub<ChatSocketHub>("/chat");
+app.MapHub<ChatSocketHub>("hubs/chat");
 
 app.Run();

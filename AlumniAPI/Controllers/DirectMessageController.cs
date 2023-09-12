@@ -105,6 +105,7 @@ public class DirectMessageController: ControllerBase
     public async Task<ActionResult<ReadDirectMessageDto>> PostDM(CreateDirectMessageDto messageDto)
     {
         var message = _mapper.Map<DirectMessage>(messageDto);
+        message.SentTime = DateTime.UtcNow;
         var messageId = await _service.AddAsync(message);
         var dto = _mapper.Map<ReadDirectMessageDto>(message);
         return CreatedAtAction("GetDM", new { id = messageId }, dto);
