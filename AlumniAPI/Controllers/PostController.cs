@@ -124,7 +124,7 @@ public class PostController : ControllerBase
         post.Title = dto.Title;
         post.Body = dto.Body;
         post.EventInfo = info;
-        post.EditedDateTime = DateTime.Now;
+        post.EditedDateTime = DateTime.UtcNow;
 
         await _postService.UpdateAsync(post);
 
