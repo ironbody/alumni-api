@@ -18,12 +18,12 @@ namespace AlumniAPI.Controllers;
 [Consumes(MediaTypeNames.Application.Json)]
 [ApiConventionType(typeof(DefaultApiConventions))]
 [Authorize]
-public class GroupController: ControllerBase
+public class GroupController : ControllerBase
 {
     private readonly IGroupService _service;
     private readonly IMapper _mapper;
 
-    
+
     public GroupController(IGroupService service, IMapper mapper)
     {
         _mapper = mapper;
@@ -126,15 +126,17 @@ public class GroupController: ControllerBase
         {
             return NotFound();
         }
+
         var group = await _service.GetByIdAsync(id);
         if (group == null)
         {
             return NotFound();
         }
+
         await _service.DeleteAsync(group);
         return NoContent();
     }
-    
+
     [HttpGet("{id:int}/Users")]
     public async Task<ActionResult<IEnumerable<ReadUserDto>>> GetGroupUsers(int id)
     {
@@ -148,7 +150,7 @@ public class GroupController: ControllerBase
         var userDto = _mapper.Map<List<ReadUserDto>>(users);
         return userDto;
     }
-    
+
     [HttpGet("{id:int}/Posts")]
     public async Task<ActionResult<IEnumerable<ReadPostDto>>> GetGroupPosts(int id)
     {
@@ -158,11 +160,13 @@ public class GroupController: ControllerBase
         }
 
         var groupWithPosts = await _service.GetGroupIncludingPosts(id);
-        List<Post> posts = groupWithPosts.Posts.ToList();
+        List<Post> posts = groupWithPosts.Posts.OrderByDescending(p =>
+                p.CreatedDateTime < p.EditedDateTime ? p.EditedDateTime : p.CreatedDateTime)
+            .ToList();
         var postDto = _mapper.Map<List<ReadPostDto>>(posts);
         return postDto;
     }
-    
+
     [HttpPut("{id:int}/Users")]
     public async Task<ActionResult> UpdateUserGroups(int id, IEnumerable<int> userIds)
     {
@@ -176,7 +180,7 @@ public class GroupController: ControllerBase
             var groupToUpdate = await _service.GetGroupIncludingUsers(id);
             await _service.UpdateGroupUsers(groupToUpdate, userIds);
         }
-        catch(KeyNotFoundException ex)
+        catch (KeyNotFoundException ex)
         {
             return BadRequest(ex.Message);
         }
