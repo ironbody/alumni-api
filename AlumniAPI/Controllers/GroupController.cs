@@ -119,7 +119,7 @@ public class GroupController: ControllerBase
     /// </summary>
     /// <param name="id">The id of the group to be deleted</param>
     /// <returns></returns>
-    [HttpDelete]
+    [HttpDelete("{id:int}")]
     public async Task<ActionResult> DeleteGroup(int id)
     {
         if (!await _service.ExistsWithIdAsync(id))
