@@ -100,4 +100,27 @@ public class PostService : IPostService
 
         return user.Groups.Any(g => g.Id == post.GroupId);
     }
+
+    public async Task<IEnumerable<Post>> SearchPostsVisibleToUser(int userId, string query)
+    {
+        var user = await _context.User
+            .Include(u => u.Groups)
+            .ThenInclude(g => g.Posts)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user is null)
+        {
+            return Enumerable.Empty<Post>();
+        }
+
+        var posts = user.Groups
+            .SelectMany(g => g.Posts)
+            .OrderByDescending(p =>
+                p.CreatedDateTime < p.EditedDateTime ? p.EditedDateTime : p.CreatedDateTime);
+        
+        var filteredPosts = posts.Where(p => p.Title.Contains(query)
+                                             || p.Body.Contains(query));
+
+        return filteredPosts;
+    }
 }
