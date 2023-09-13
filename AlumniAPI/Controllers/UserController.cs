@@ -211,7 +211,7 @@ public class UserController : ControllerBase
         messages = messages.ToList().Where(e => e[0].RecipientId == id || e[0].SenderId == id).ToList();
         if (messages.Count <= 0)
         {
-            return BadRequest();
+            return Ok();
         }
         var dmDto = _mapper.Map<List<ReadDirectMessageDto>>(messages[0]);
         return dmDto;
