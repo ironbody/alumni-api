@@ -15,9 +15,9 @@ public class ChatSocketHub : Hub
     {
         await Clients
             .Group(senderId.ToString())
-            .SendAsync("ReceiveMessage", body, senderId, recipientId);
+            .SendAsync("ReceiveMessage", body, senderId, DateTime.UtcNow,recipientId);
         await Clients
             .Group(recipientId.ToString())
-            .SendAsync("ReceiveMessage", body, senderId, recipientId);
+            .SendAsync("ReceiveMessage", body, senderId, DateTime.UtcNow,recipientId);
     }
 }
