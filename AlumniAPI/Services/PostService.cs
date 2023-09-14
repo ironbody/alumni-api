@@ -117,9 +117,9 @@ public class PostService : IPostService
             .SelectMany(g => g.Posts)
             .OrderByDescending(p =>
                 p.CreatedDateTime < p.EditedDateTime ? p.EditedDateTime : p.CreatedDateTime);
-        
-        var filteredPosts = posts.Where(p => p.Title.Contains(query)
-                                             || p.Body.Contains(query));
+
+        var filteredPosts = posts.Where(p => p.Title.ToLowerInvariant().Contains(query.ToLowerInvariant())
+                                             || p.Body.ToLowerInvariant().Contains(query.ToLowerInvariant()));
 
         return filteredPosts;
     }
