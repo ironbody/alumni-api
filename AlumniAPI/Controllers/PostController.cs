@@ -309,15 +309,15 @@ public class PostController : ControllerBase
             return Forbid();
         }
 
-        if (user.Id != post.CreatorId)
-        {
-            return Forbid();
-        }
-
         var reply = await _replyService.GetByIdAsync(replyId);
         if (reply is null)
         {
             return NotFound("Reply does not exist");
+        }
+
+        if (user.Id != reply.CreatorId)
+        {
+            return Forbid();
         }
 
         if (reply.ReplyToId != postId)
