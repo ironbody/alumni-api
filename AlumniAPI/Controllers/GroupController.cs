@@ -69,10 +69,10 @@ public class GroupController : ControllerBase
     /// Updates a group
     /// </summary>
     /// <param name="id">Id of the group to update</param>
-    /// <param name="userDto">The new group details</param>
+    /// <param name="groupDto">The new group details</param>
     /// <returns></returns>
     [HttpPut("{id:int}")]
-    public async Task<ActionResult> PutDM(int id, UpdateGroupDto groupDto)
+    public async Task<ActionResult> PutGroup(int id, UpdateGroupDto groupDto)
     {
         if (id != groupDto.Id)
         {
@@ -97,7 +97,7 @@ public class GroupController : ControllerBase
             }
         }
 
-        return NotFound();
+        return NoContent();
     }
 
     /// <summary>
