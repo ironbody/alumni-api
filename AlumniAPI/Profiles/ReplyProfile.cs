@@ -1,7 +1,8 @@
-﻿
-using AlumniAPI.DTOs.Post.Reply;
+﻿using AlumniAPI.DTOs.Post.Reply;
 using AlumniAPI.Models;
 using AutoMapper;
+
+namespace AlumniAPI.Profiles;
 
 public class ReplyProfile: Profile
 {

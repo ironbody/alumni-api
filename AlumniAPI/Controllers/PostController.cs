@@ -100,6 +100,36 @@ public class PostController : ControllerBase
         return CreatedAtAction(nameof(GetPostById), new { id = mapped.Id }, readDto);
     }
 
+    [HttpGet("search")]
+    public async Task<ActionResult<IEnumerable<SearchDto>>> SearchForPost([FromQuery] string query)
+    {
+        var user = await RetrieveUser();
+        if (user is null)
+        {
+            return BadRequest(UserWithEmailNotFoundMessage);
+        }
+
+        var posts = await _postService.SearchPostsVisibleToUser(user.Id, query);
+        var replies = await _replyService.SearchRepliesVisibleToUser(user.Id, query);
+
+        var mappedPosts = _mapper.Map<IEnumerable<ReadPostDto>>(posts);
+
+        var searchHits = new List<SearchDto>();
+        foreach (var post in mappedPosts)
+        {
+            searchHits.Add(new() { Post = post, Reply = null });
+        }
+
+        foreach (var reply in replies)
+        {
+            var mappedPost = _mapper.Map<ReadPostDto>(reply.ReplyTo);
+            var mappedReply = _mapper.Map<ReadReplyDto>(reply);
+            searchHits.Add(new() { Post = mappedPost, Reply = mappedReply });
+        }
+
+        return Ok(searchHits);
+    }
+
     [HttpPut("{id:int}")]
     public async Task<ActionResult> EditPost(int id, EditPostDto dto)
     {
