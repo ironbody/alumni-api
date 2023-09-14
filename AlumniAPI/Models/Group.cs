@@ -12,6 +12,8 @@ public class Group
     
     public int CreatorId { get; set; }
     
+    public bool Private { get; set; }
+    
     public ICollection<User> Users { get; set; }
     public ICollection<Post> Posts { get; set; }
 }

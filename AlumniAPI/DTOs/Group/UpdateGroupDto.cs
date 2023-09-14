@@ -7,4 +7,5 @@ public class UpdateGroupDto
     public string? Description { get; set; }
     public string? Image { get; set; }
     public int CreatorId { get; set; }
+    public bool Private { get; set; }
 }
