@@ -57,6 +57,13 @@ public class AlumniDbContext: DbContext
             .HasForeignKey(e => e.ReplyToId)
             .IsRequired();
         
+        //Group Creator one to Many
+        modelBuilder.Entity<Group>()
+            .HasOne(g => g.Creator)  
+            .WithMany(u => u.CreatedGroups)
+            .HasForeignKey(g => g.CreatorId)
+            .OnDelete(DeleteBehavior.Restrict);
+        
         //Seeding
         modelBuilder.Entity<Post>().HasData(SeedHelper.GetPostSeeds());
         modelBuilder.Entity<EventInfo>().HasData(SeedHelper.GetEventInfoSeeds());
