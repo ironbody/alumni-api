@@ -2,6 +2,7 @@
 using AlumniAPI.DTOs.Group;
 using AlumniAPI.DTOs.Post;
 using AlumniAPI.DTOs.User;
+using AlumniAPI.Extensions;
 using AlumniAPI.Models;
 using AlumniAPI.Services.Interfaces;
 using AutoMapper;
@@ -21,13 +22,15 @@ namespace AlumniAPI.Controllers;
 public class GroupController : ControllerBase
 {
     private readonly IGroupService _service;
+    private readonly IUserService _userService;
     private readonly IMapper _mapper;
 
 
-    public GroupController(IGroupService service, IMapper mapper)
+    public GroupController(IGroupService service, IUserService userService, IMapper mapper)
     {
         _mapper = mapper;
         _service = service;
+        _userService = userService;
     }
 
     /// <summary>
@@ -54,8 +57,12 @@ public class GroupController : ControllerBase
         {
             return NotFound();
         }
+        
+        string email = HttpContext.GetUserEmail();
+        var user = await _userService.GetUserByEmail(email);
+        if (user is null) return NotFound();
 
-        var group = await _service.GetByIdAsync(id);
+        var group = await _service.GetByIdAsync(id, user.Id);
         if (group == null)
         {
             return NotFound();
