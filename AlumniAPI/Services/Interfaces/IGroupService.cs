@@ -8,5 +8,5 @@ public interface IGroupService: IRepository<Group>
     Task<Group> GetGroupIncludingUsers(int id);
     Task<Group> GetGroupIncludingPosts(int id);
     Task UpdateGroupUsers(Group group, IEnumerable<int> userIds);
-    Task<Group?> GetByIdAsync(int id, int userId);
+    Task<bool> GetIfUserInGroup(int id, int userId);
 }
