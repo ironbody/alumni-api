@@ -16,6 +16,7 @@ public class User
     public ICollection<DirectMessage> SentMessages { get; set; }
     public ICollection<DirectMessage> ReceivedMessages { get; set; }
 
+    public ICollection<Group> CreatedGroups { get; set; }
     public ICollection<Group> Groups { get; set; }
     public ICollection<Post> Posts { get; set; }
     public ICollection<Reply> Replies { get; set; }
