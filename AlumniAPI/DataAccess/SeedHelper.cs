@@ -11,8 +11,8 @@ public static class SeedHelper
             Id = 1,
             CreatorId = 1,
             GroupId = 1,
-            Title = "Ideas for the skibidi event",
-            Body = "So we're having a skibidi event. If anyone have any good ideas, please write them down below.",
+            Title = "The anything event",
+            Body = "So we're having a event. If anyone have any good ideas, please write them down below.",
             CreatedDateTime = new DateTime(2023, 09, 04, 17, 0, 0),
         };
 
@@ -23,7 +23,7 @@ public static class SeedHelper
             CreatorId = 2,
             GroupId = 2,
             Title = "Kräftskiva",
-            Body = "Kräftskiva at my place, BYOB",
+            Body = "Kräftskiva at my place.",
             CreatedDateTime = new DateTime(2023, 09, 03, 20, 0, 0),
         };
 
@@ -91,30 +91,30 @@ public static class SeedHelper
                 Id = 1,
                 Name = "Oscar",
                 Email = "oscar@test.com",
-                AvatarURL = "https://temashopse.b-cdn.net/media/catalog/product/cache/cat_resized/1200/0/s/h/shrek_r_maskeraddrakt_maskeraddrakter_maskeradklader_for_man.jpg",
-                Bio = "Shrek/Kong lover",
-                FunFact = "Loves Shrek and Kong",
-                WorkStatus = "Rich"
+                AvatarURL = "https://images.freeimages.com/images/large-previews/10e/halloween-skull-1-1309392.jpg",
+                Bio = "Studied a game programming at BTH.",
+                FunFact = "I Have watched all shrek movies 10 times",
+                WorkStatus = "Employed"
             },
             new User()
             {
                 Id = 2,
                 Name = "Simon",
                 Email = "simon@test.com",
-                AvatarURL = "https://preview.redd.it/ufc-fight-night-shrek-vs-adam-sandler-v0-d3r78jgnhmv91.jpg?width=512&format=pjpg&auto=webp&s=2f93c0115d58a24e638a69f0a21fc571da99ac55",
-                Bio = "Hello I'm Simon and I love HAVREFLARN med choklad",
-                FunFact = "Cookie lover XD",
-                WorkStatus = "YeBoi"
+                AvatarURL = "https://media.istockphoto.com/id/144219155/sv/foto/close-up-of-a-green-tree-frog-on-a-white-background.jpg?s=2048x2048&w=is&k=20&c=HB7twSjmtufkzMGJ1PvJ7YluR9oN7ZhD2wZQM1NMljU=",
+                Bio = "Studied Software Engineering at BTH",
+                FunFact = "I Love Chokladdoppade havreflarn.",
+                WorkStatus = "Employed"
             },
             new User()
             {
                 Id = 3,
                 Name = "Erik",
                 Email = "erik@test.com",
-                AvatarURL = "https://pbs.twimg.com/profile_images/1342617687663521793/4lVjmcIk_400x400.jpg",
-                Bio = "Erik aka MuminLover1337",
-                FunFact = "I LOVE MUUUUMIN!",
-                WorkStatus = "Lobster"
+                AvatarURL = "https://media.istockphoto.com/id/1444396028/sv/foto/aland-islands-flag-pinned-white-background.jpg?s=2048x2048&w=is&k=20&c=PB9wGjejrjQeUonzDboZxRUrLuX9xp318lbyo_19vvI=",
+                Bio = "Studied web development at BTH",
+                FunFact = "I Can eat 19.61 sushi pieces in one sitting.",
+                WorkStatus = "Employed"
             }
             
         };
@@ -127,7 +127,7 @@ public static class SeedHelper
             new DirectMessage()
             {
                 Id = 1,
-                Body = "Hello Mr.Moomin how are you?",
+                Body = "Hello Erik, how did you eat soo many pieces in one sitting???",
                 SentTime = new DateTime(2023,9,4,9,4,32),
                 SenderId = 1,
                 RecipientId = 3
@@ -135,23 +135,23 @@ public static class SeedHelper
             new DirectMessage()
             {
                 Id = 2,
-                Body = "Hey, im a bit depressed. I might need a kong strong...",
+                Body = "It was easy, I just did it.",
                 SentTime = new DateTime(2023,9,4,9,4,57),
                 SenderId = 3,
                 RecipientId = 1
             },
             new DirectMessage()
             {
-            Id = 3,
-            Body = "lol",
-            SentTime = new DateTime(2023,9,4,9,5,50),
-            SenderId = 1,
-            RecipientId = 3
+                Id = 3,
+                Body = "Wow, very cool!",
+                SentTime = new DateTime(2023,9,4,9,5,50),
+                SenderId = 1,
+                RecipientId = 3
             },
             new DirectMessage()
             {
                 Id = 4,
-                Body = "blablabla",
+                Body = "Hello Simon, how are you?",
                 SentTime = new DateTime(2023,9,4,9,4,32),
                 SenderId = 1,
                 RecipientId = 2
@@ -159,7 +159,7 @@ public static class SeedHelper
             new DirectMessage()
             {
                 Id = 5,
-                Body = "blablabla",
+                Body = "Hey Oscar! Good, I just ate 10 havreflarn!",
                 SentTime = new DateTime(2023,9,4,9,4,32),
                 SenderId = 2,
                 RecipientId = 3
@@ -176,18 +176,24 @@ public static class SeedHelper
                 Id = 1,
                 Name = "Kayakers",
                 Description = "Group for people who lowes kayaking.",
+                CreatorId = 1,
+                Private = false,
             },
             new Group()
             {
                 Id = 2,
-                Name = "Kareoke Nights",
-                Description = "Group for people who want to sing kareoke.",
+                Name = "Karaoke Nights",
+                Description = "Group for people who want to sing karaoke.",
+                CreatorId = 2,
+                Private = false,
             },
             new Group()
             {
                 Id = 3,
                 Name = "Spongebob Fanatics",
                 Description = "Group for people who LOVE spongebob",
+                CreatorId = 3,
+                Private = false,
             }
         };
     }
