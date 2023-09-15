@@ -58,11 +58,8 @@ public class GroupController : ControllerBase
             return NotFound();
         }
         
-        string email = HttpContext.GetUserEmail();
-        var user = await _userService.GetUserByEmail(email);
-        if (user is null) return NotFound();
+        var group = await _service.GetByIdAsync(id);
 
-        var group = await _service.GetByIdAsync(id, user.Id);
         if (group == null)
         {
             return NotFound();
@@ -70,6 +67,21 @@ public class GroupController : ControllerBase
 
         var groupDto = _mapper.Map<ReadGroupDto>(group);
         return Ok(groupDto);
+    }
+
+    [HttpGet("{id:int}/check")]
+    public async Task<ActionResult<bool>> GetIfUserInGroup(int id)
+    {
+        if (!await _service.ExistsWithIdAsync(id))
+        {
+            return NotFound();
+        }
+
+        string email = HttpContext.GetUserEmail();
+        var user = await _userService.GetUserByEmail(email);
+        if (user is null) return NotFound();
+
+        return Ok(await _service.GetIfUserInGroup(id, user.Id));
     }
 
     /// <summary>

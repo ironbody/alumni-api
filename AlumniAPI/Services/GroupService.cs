@@ -13,12 +13,11 @@ public class GroupService: IGroupService
     {
         _context = context;
     }
-    public async Task<Group?> GetByIdAsync(int id, int userId)
+    public async Task<bool> GetIfUserInGroup(int id, int userId)
     {
         return await _context.Group
             .Where(g => g.Id == id && g.Users.Any(u => u.Id == userId))
-            .Include(g => g.Users)
-            .FirstOrDefaultAsync();
+            .AnyAsync();
     }
 
     public async Task<Group?> GetByIdAsync(int id)
