@@ -1,3 +1,4 @@
+using System.Reflection;
 using AlumniAPI.DataAccess;
 using AlumniAPI.Services;
 using AlumniAPI.Services.Interfaces;
@@ -44,6 +45,11 @@ builder.Services.AddSwaggerGen(option =>
             Array.Empty<string>()
         }
     });
+    
+    // Set the comments path for the Swagger JSON and UI.
+    string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    option.IncludeXmlComments(xmlPath);
 });
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opt =>
