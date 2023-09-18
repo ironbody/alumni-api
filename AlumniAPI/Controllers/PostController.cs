@@ -285,7 +285,6 @@ public class PostController : ControllerBase
 
         await _replyService.UpdateAsync(reply);
 
-        // WHY THE FUCK IS THERE SO MUCH CODE JUST FOR VALIDATION AAAAAAA
         return Ok();
     }
 
@@ -327,7 +326,6 @@ public class PostController : ControllerBase
 
         await _replyService.DeleteAsync(reply);
 
-        // WHY THE FUCK IS THERE SO MUCH CODE JUST FOR VALIDATION AAAAAAA
         return Ok();
     }
 

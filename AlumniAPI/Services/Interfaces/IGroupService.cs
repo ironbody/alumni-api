@@ -1,4 +1,4 @@
-﻿using AlumniAPI.Models;
+using AlumniAPI.Models;
 using MovieAPI.Services.Interfaces;
 
 namespace AlumniAPI.Services.Interfaces;
@@ -32,4 +32,5 @@ public interface IGroupService: IRepository<Group>
     /// <param name="group">Group object</param>
     /// <param name="postIds">List of posts denoted by their ids</param>
     Task UpdateGroupPosts(Group group, IEnumerable<int> postIds);
+    Task<bool> GetIfUserInGroup(int id, int userId);
 }
