@@ -2,6 +2,8 @@
 
 Deployed at https://case-alumni-api.azurewebsites.net
 
+[API Documentation](https://case-alumni-api.azurewebsites.net/swagger/index.html)
+
 # Deployment
 
 ## Keycloak
