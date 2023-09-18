@@ -32,5 +32,12 @@ public interface IGroupService: IRepository<Group>
     /// <param name="group">Group object</param>
     /// <param name="postIds">List of posts denoted by their ids</param>
     Task UpdateGroupPosts(Group group, IEnumerable<int> postIds);
+    
+    /// <summary>
+    /// Checks if a user exists in a group.
+    /// </summary>
+    /// <param name="id">Group's id</param>
+    /// <param name="userId">User's id</param>
+    /// <returns>True if user is in group. False otherwise.</returns>
     Task<bool> GetIfUserInGroup(int id, int userId);
 }
