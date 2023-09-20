@@ -2,7 +2,7 @@
 
 Deployed at https://case-alumni-api.azurewebsites.net
 
-[API Documentation](https://case-alumni-api.azurewebsites.net/swagger/index.html)
+API Documentation available on a local instance of the API with swagger at [API Documentation](https://localhost:7287/swagger/index.html)
 
 # Deployment
 
